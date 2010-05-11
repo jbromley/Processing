@@ -3,6 +3,7 @@ package com.jbromley.processing;
 import java.util.ArrayList;
 
 import processing.core.PApplet;
+import processing.core.PMatrix2D;
 import processing.core.PVector;
 
 /**
@@ -13,10 +14,19 @@ import processing.core.PVector;
 public class Boid {
 	
 	private static final int THROB_PERIOD = 500;
+	private static final float WANDER_RADIUS = 1.2f;
+	private static final float WANDER_DISTANCE = 2.0f;
+	private static final float WANDER_JITTER = 80.0f;
 
 	private PVector position;
 	private PVector velocity;
 	private PVector accel;
+
+	private PVector wanderTarget;
+	private float wanderJitter;
+	private float wanderRadius;
+	private float wanderDistance;
+	
 	private float startRadius;
 	private float radius;
 	private float maxForce;    // Maximum steering force
@@ -43,7 +53,15 @@ public class Boid {
 		color = parent.color(parent.random(0, 256), parent.random(0, 256), 
 							 parent.random(0, 256));
 		throbOffset = (int) parent.random(0, THROB_PERIOD);
-		//color = parent.color(255, 255, 255);
+
+		// Set up wandering parameters.
+		wanderJitter = WANDER_JITTER;
+		wanderRadius = WANDER_RADIUS;
+		wanderDistance = WANDER_DISTANCE;
+		
+		float theta = parent.random(1.0f) * PApplet.TWO_PI;
+		wanderTarget = new PVector(wanderRadius * PApplet.cos(theta),
+								   wanderRadius * PApplet.sin(theta));
 	}
 
 	/**
@@ -65,6 +83,7 @@ public class Boid {
 		PVector separation = separate(boids);
 		PVector alignment = align(boids);
 		PVector cohesion = cohesion(boids);
+		PVector wander = wander();
 		
 		// Weight the steering forces.
 		separation.mult(1.5f);
@@ -75,6 +94,7 @@ public class Boid {
 		accel.add(separation);
 		accel.add(alignment);
 		accel.add(cohesion);
+		accel.add(wander);
 	}
 
 	/**
@@ -88,6 +108,7 @@ public class Boid {
 		// Calculate motion for this step.
 		velocity.add(accel);
 		velocity.limit(maxSpeed);
+		
 		position.add(velocity);
 
 		// Reset the acceleration for the next step.
@@ -142,6 +163,40 @@ public class Boid {
 		}
 		
 		return steer;
+	}
+	
+	/**
+	 * Adds a small amount of random wandering to a boid's path.
+	 */
+	private PVector wander() {
+		float jitter = wanderJitter * (1.0f / parent.frameRate);
+		wanderTarget.add(new PVector(parent.random(-1.0f, 1.0f) * jitter,
+						 parent.random(-1.0f, 1.0f) * jitter));
+		wanderTarget.normalize();
+		wanderTarget.mult(wanderRadius);
+		PVector target = wanderTarget;
+		target.add(new PVector(wanderDistance, 0.0f));
+		PVector worldTarget = pointToWorldSpace(position, velocity, target);
+
+		return steer(worldTarget, false);
+	}
+	
+	/**
+	 * Converts a point from boid local coordinates to world coordinates. Boid 
+	 * local coordinates have the x-axis aligned with the velocity and the 
+	 * y-axis perpendicular to this.
+	 * @param target the point in boid-local coordinates
+	 * @param velocity the boid's velocity vector 
+	 * @param position the boid's position in world coordinates
+	 * @return the point translated to world coordinates
+	 */
+	PVector pointToWorldSpace(PVector position, PVector velocity, PVector localPos) {
+		PMatrix2D m = new PMatrix2D(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+		m.translate(position.x, position.y);
+		m.rotate(velocity.heading2D());
+		PVector worldPos = new PVector();
+		m.mult(localPos, worldPos);
+		return worldPos;
 	}
 
 	/** 
