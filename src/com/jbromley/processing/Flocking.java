@@ -1,5 +1,8 @@
 package com.jbromley.processing;
 
+import java.awt.geom.Line2D;
+import java.util.ArrayList;
+
 import processing.core.PApplet;
 import processing.core.PVector;
 
@@ -11,15 +14,24 @@ public class Flocking extends PApplet {
 	
 	private static final long serialVersionUID = 9221726134245604843L;
 
-	private static final int INITIAL_BOIDS = 250;
+	private static final int INITIAL_BOIDS = 200;
 	
 	private Flock flock = null;
+	private ArrayList<Line2D.Float> walls = null;
 	
 	/**
 	 * Creates the flock boids demo. 
 	 */
 	public void setup() {
 		size(1280, 800);
+		
+		// Create walls
+		walls = new ArrayList<Line2D.Float>();
+		walls.add(new Line2D.Float(0.0f, 0.0f, 1279.0f, 0.0f));
+		walls.add(new Line2D.Float(1279.0f, 0.0f, 1279.0f, 799.0f));
+		walls.add(new Line2D.Float(1279.0f, 799.0f, 0.0f, 799.0f));
+		walls.add(new Line2D.Float(0.0f, 799.0f, 0.0f, 0.0f));
+		walls.add(new Line2D.Float(640.0f, 200.0f, 640.0f, 600.0f));
 		
 		flock = new Flock();
 		
@@ -34,6 +46,11 @@ public class Flocking extends PApplet {
 	public void draw() {
 		background(0);
 		flock.update();
+		
+		stroke(255);
+		for (Line2D.Float wall : walls) {
+			line(wall.x1, wall.y1, wall.x2, wall.y2);
+		}
 	}
 	
 	/**
@@ -42,6 +59,14 @@ public class Flocking extends PApplet {
 	 */
 	public void mousePressed() {
 		flock.addBoid(new Boid(new PVector(mouseX, mouseY), 2.0f, 0.05f, this));
+	}
+	
+	/**
+	 * Returns the list of walls.
+	 * @return an ArrayList of Wall objects
+	 */
+	public ArrayList<Line2D.Float> getWalls() {
+		return walls;
 	}
 
 	public static void main(String[] args) {

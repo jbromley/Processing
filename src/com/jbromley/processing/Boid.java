@@ -1,5 +1,6 @@
 package com.jbromley.processing;
 
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 
 import processing.core.PApplet;
@@ -27,13 +28,29 @@ public class Boid {
 	private float wanderRadius;
 	private float wanderDistance;
 	
+	private PVector feelers[] = new PVector[3];
+	
 	private float startRadius;
 	private float radius;
 	private float maxForce;    // Maximum steering force
 	private float maxSpeed;    // Maximum speed
 	private int color;
 	private int throbOffset;
-	private PApplet parent;
+	private Flocking parent;
+	
+	/**
+	 * This class is a value object for intersection test results.
+	 * @author <a href="mailto:jbromley@gmail.com">J. Bromley</a>
+	 */
+	private static class Intersection {
+		public Intersection(PVector point, float distance) {
+			this.point = point;
+			this.distance = distance;
+		}
+		
+		public PVector point;
+		public float distance;
+	}
 
 	/**
 	 * Create a single boid.
@@ -42,7 +59,7 @@ public class Boid {
 	 * @param mf the maximum force that can be applied to a boid
 	 * @param owner the PApplet owner of the boid
 	 */
-	public Boid(PVector pos, float ms, float mf, PApplet owner) {
+	public Boid(PVector pos, float ms, float mf, Flocking owner) {
 		parent = owner;
 		position = pos.get();
 		velocity = new PVector(parent.random(-1, 1), parent.random(-1, 1));
@@ -71,7 +88,7 @@ public class Boid {
 	public void update(ArrayList<Boid> boids) {
 		flock(boids);
 		updateMotion();
-		checkBoundaries();
+		//checkBoundaries();
 		render();
 	}
 
@@ -84,6 +101,7 @@ public class Boid {
 		PVector alignment = align(boids);
 		PVector cohesion = cohesion(boids);
 		PVector wander = wander();
+		PVector avoidWalls = avoidWalls();
 		
 		// Weight the steering forces.
 		separation.mult(1.5f);
@@ -93,8 +111,9 @@ public class Boid {
 		// Add the force vectors to acceleration.
 		accel.add(separation);
 		accel.add(alignment);
-		accel.add(cohesion);
+		accel.add(PVector.mult(cohesion, 1.5f));
 		accel.add(wander);
+		accel.add(PVector.mult(avoidWalls, 0.5f));
 	}
 
 	/**
@@ -166,6 +185,84 @@ public class Boid {
 	}
 	
 	/**
+	 * Avoids walls in the world.
+	 */
+	private PVector avoidWalls() {
+		double distClosest = Double.MAX_VALUE;
+		Line2D.Float closestWall = null;
+		PVector touchingFeeler = null;
+		PVector closestPoint = new PVector();
+		PVector steer = new PVector();
+		
+		createFeelers();
+		
+		for (PVector feeler : feelers) {
+			for (Line2D.Float wall : parent.getWalls()) {
+				Intersection intersection = null;
+				if ((intersection = intersectsLine(wall, position, feeler)) != null) {
+					if (intersection.distance < distClosest) {
+						closestWall = wall;
+						touchingFeeler = feeler;
+						distClosest = intersection.distance;
+						closestPoint = intersection.point;
+					}
+				}
+			}
+		}
+		
+		if (closestWall != null) {
+			PVector overshoot = PVector.sub(touchingFeeler, closestPoint);
+			PVector temp = new PVector(-(closestWall.y2 - closestWall.y1), 
+					(closestWall.x2 - closestWall.x1));
+			temp.normalize();
+			steer = PVector.mult(temp, overshoot.mag());
+		}
+		
+		return steer;
+	}
+	
+	private Intersection intersectsLine(Line2D.Float line, PVector point1, PVector point2) {
+		float rNumerator = (point1.y - line.y1) * (line.x2 - line.x1) -
+				(point1.x - line.x1) * (line.y2 - line.y1);
+		float sNumerator = (point1.y - line.y1) * (point2.x - point1.x) -
+				(point1.x - line.x1) * (point2.y - point1.y);
+		float det = (point2.x - point1.x) * (line.y2 - line.y1) -
+				(point2.y - point1.y) * (line.x2 - line.x1);
+		
+		if (det == 0.0f) {
+			return null;
+		}
+		
+		float r = rNumerator / det;
+		float s = sNumerator / det;
+		if (0.0f < r && r < 1.0f && 0.0f < s && s < 1.0f) {
+			PVector point = PVector.add(point1, 
+					PVector.mult(PVector.sub(point2, point1), (float) r));
+			float distance = PVector.dist(point1, point);
+			return new Intersection(point, distance);
+		}
+		
+		return null;
+	}
+	
+	private void createFeelers() {
+		final float FEELER_LENGTH = 24.0f;
+		
+		feelers[0] = PVector.add(position, PVector.mult(velocity, FEELER_LENGTH));
+		
+		PMatrix2D rotateMatrix = new PMatrix2D();
+		rotateMatrix.rotate(PApplet.HALF_PI * 3.5f);
+		PVector temp = new PVector();
+		rotateMatrix.mult(velocity, temp);
+		feelers[1] = PVector.add(position, PVector.mult(temp, FEELER_LENGTH / 2.0f));
+		
+		rotateMatrix.set(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+		rotateMatrix.rotate(PApplet.HALF_PI * 0.5f);
+		rotateMatrix.mult(velocity, temp);
+		feelers[2] = PVector.add(position, PVector.mult(temp, FEELER_LENGTH / 2.0f));
+	}
+	
+	/**
 	 * Adds a small amount of random wandering to a boid's path.
 	 */
 	private PVector wander() {
@@ -191,7 +288,7 @@ public class Boid {
 	 * @return the point translated to world coordinates
 	 */
 	PVector pointToWorldSpace(PVector position, PVector velocity, PVector localPos) {
-		PMatrix2D m = new PMatrix2D(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+		PMatrix2D m = new PMatrix2D();
 		m.translate(position.x, position.y);
 		m.rotate(velocity.heading2D());
 		PVector worldPos = new PVector();
@@ -216,6 +313,10 @@ public class Boid {
 		parent.vertex(radius, radius * 2);
 		parent.endShape();
 		parent.popMatrix();
+		
+//		for (int i = 0; i < feelers.length; ++i) {
+//			parent.line(position.x, position.y, feelers[i].x, feelers[i].y);
+//		}
 	}
 
 	/**
