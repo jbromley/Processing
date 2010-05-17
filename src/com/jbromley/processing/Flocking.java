@@ -4,6 +4,7 @@ import java.awt.geom.Line2D;
 import java.util.ArrayList;
 
 import processing.core.PApplet;
+import processing.core.PFont;
 import processing.core.PVector;
 
 /**
@@ -14,10 +15,11 @@ public class Flocking extends PApplet {
 	
 	private static final long serialVersionUID = 9221726134245604843L;
 
-	private static final int INITIAL_BOIDS = 200;
+	private static final int INITIAL_BOIDS = 250;
 	
 	private Flock flock = null;
 	private ArrayList<Line2D.Float> walls = null;
+	private PFont font = null;
 	
 	/**
 	 * Creates the flock boids demo. 
@@ -31,13 +33,16 @@ public class Flocking extends PApplet {
 		walls.add(new Line2D.Float(1279.0f, 0.0f, 1279.0f, 799.0f));
 		walls.add(new Line2D.Float(1279.0f, 799.0f, 0.0f, 799.0f));
 		walls.add(new Line2D.Float(0.0f, 799.0f, 0.0f, 0.0f));
-		walls.add(new Line2D.Float(640.0f, 200.0f, 640.0f, 600.0f));
+		//walls.add(new Line2D.Float(640.0f, 200.0f, 640.0f, 600.0f));
 		
 		flock = new Flock();
 		
 		for (int i = 0; i < INITIAL_BOIDS; ++i) {
-			flock.addBoid(new Boid(new PVector(width / 2, height / 2), 3.0f, 0.05f, this));
+			flock.addBoid(new Boid(new PVector(width / 2, height / 2), 
+					random(1.0f, 3.0f), 0.10f, this));
 		}
+		
+		font = createFont("Helvetica", 12);
 	}
 	
 	/**
@@ -51,6 +56,10 @@ public class Flocking extends PApplet {
 		for (Line2D.Float wall : walls) {
 			line(wall.x1, wall.y1, wall.x2, wall.y2);
 		}
+		
+		fill(255);
+		textFont(font);
+		text("" + frameRate + " fps", 16, height - 16);
 	}
 	
 	/**
