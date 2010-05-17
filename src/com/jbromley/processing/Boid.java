@@ -14,10 +14,11 @@ import processing.core.PVector;
  */
 public class Boid {
 	
-	private static final int THROB_PERIOD = 500;
+	private static final int THROB_PERIOD = 250;
 	private static final float WANDER_RADIUS = 1.2f;
 	private static final float WANDER_DISTANCE = 2.0f;
-	private static final float WANDER_JITTER = 80.0f;
+	private static final float WANDER_JITTER = 40.0f;
+	private static final float NEIGHBORHOOD_SIZE = 25.0f;
 
 	private PVector position;
 	private PVector velocity;
@@ -64,7 +65,7 @@ public class Boid {
 		position = pos.get();
 		velocity = new PVector(parent.random(-1, 1), parent.random(-1, 1));
 		accel = new PVector(0,0);
-		startRadius = 4.0f;
+		startRadius = 6.0f;
 		maxSpeed = ms;
 		maxForce = mf;
 		color = parent.color(parent.random(0, 256), parent.random(0, 256), 
@@ -80,6 +81,10 @@ public class Boid {
 		wanderTarget = new PVector(wanderRadius * PApplet.cos(theta),
 								   wanderRadius * PApplet.sin(theta));
 	}
+	
+	public PVector getPosition() {
+		return position;
+	}
 
 	/**
 	 * Advances the state of the boid through a single step
@@ -88,7 +93,7 @@ public class Boid {
 	public void update(ArrayList<Boid> boids) {
 		flock(boids);
 		updateMotion();
-		//checkBoundaries();
+		//enforceNoOverlap(boids);
 		render();
 	}
 
@@ -105,15 +110,14 @@ public class Boid {
 		
 		// Weight the steering forces.
 		separation.mult(1.5f);
-		alignment.mult(1.0f);
-		cohesion.mult(1.0f);
+		cohesion.mult(0.5f);
 
 		// Add the force vectors to acceleration.
 		accel.add(separation);
 		accel.add(alignment);
 		accel.add(PVector.mult(cohesion, 1.5f));
 		accel.add(wander);
-		accel.add(PVector.mult(avoidWalls, 0.5f));
+		accel.add(PVector.mult(avoidWalls, 1.5f));
 	}
 
 	/**
@@ -121,7 +125,7 @@ public class Boid {
 	 */
 	private void updateMotion() {
 		// Make boid "throb".
-		radius = startRadius * (1.5f + PApplet.sin(throbOffset + 
+		radius = startRadius * (1.0f + 0.5f * PApplet.sin(throbOffset + 
 				(float) parent.millis() / THROB_PERIOD));
 		
 		// Calculate motion for this step.
@@ -216,6 +220,7 @@ public class Boid {
 					(closestWall.x2 - closestWall.x1));
 			temp.normalize();
 			steer = PVector.mult(temp, overshoot.mag());
+			//steer.limit(maxForce);
 		}
 		
 		return steer;
@@ -246,7 +251,7 @@ public class Boid {
 	}
 	
 	private void createFeelers() {
-		final float FEELER_LENGTH = 24.0f;
+		final float FEELER_LENGTH = 32.0f;
 		
 		feelers[0] = PVector.add(position, PVector.mult(velocity, FEELER_LENGTH));
 		
@@ -383,7 +388,7 @@ public class Boid {
 	 * @return a vector aligned with the flock's average velocity
 	 */
 	private PVector align (ArrayList<Boid> boids) {
-		float neighborDist = 25.0f;
+		float neighborDist = NEIGHBORHOOD_SIZE;
 		PVector steer = new PVector(0,0,0);
 		int count = 0;
 		for (Boid other : boids) {
@@ -416,7 +421,7 @@ public class Boid {
 	 * @return steering force to go towards average position of neighbors
 	 */
 	private PVector cohesion (ArrayList<Boid> boids) {
-		float neighborDist = 25.0f;
+		float neighborDist = NEIGHBORHOOD_SIZE;
 		PVector sum = new PVector(0,0);
 		int count = 0;
 		for (Boid other : boids) {
@@ -432,5 +437,23 @@ public class Boid {
 			return steer(sum, false);  // Steer towards the location
 		}
 		return sum;
+	}
+	
+	/**
+	 * Enforce the non-overlap condition.
+	 */
+	private void enforceNoOverlap(ArrayList<Boid> boids) {
+		for (Boid other : boids) {
+			if (this == other) {
+				continue;
+			}
+			
+			PVector separationVector = PVector.sub(position, other.position);
+			float distance = separationVector.mag();
+			float overlap = radius + other.radius - distance;
+			if (overlap >= 0.0f){
+				position.add(PVector.mult(PVector.div(separationVector, distance), overlap));
+			}
+		}
 	}
 }
