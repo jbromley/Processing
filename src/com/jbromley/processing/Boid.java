@@ -393,7 +393,7 @@ public class Boid {
 		int count = 0;
 		for (Boid other : boids) {
 			float d = PVector.dist(position, other.position);
-			if ((d > 0) && (d < neighborDist)) {
+			if (d > 0 && d < neighborDist) {
 				steer.add(other.velocity);
 				count++;
 			}
@@ -404,7 +404,6 @@ public class Boid {
 
 		// As long as the vector is greater than 0
 		if (steer.mag() > 0) {
-			// Implement Reynolds: Steering = Desired - Velocity
 			steer.normalize();
 			steer.mult(maxSpeed);
 			steer.sub(velocity);
