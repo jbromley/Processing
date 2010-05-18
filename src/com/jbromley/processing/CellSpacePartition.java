@@ -135,8 +135,8 @@ public class CellSpacePartition<T extends Boid> {
 		for (Cell<T> cell : cells) {
 			if (!cell.members.isEmpty() && cell.boundingBox.intersects(queryBox)) {
 				for (T member : cell.members) {
-					PVector separation = PVector.sub(member.getPosition(), targetPosition);
-					if (separation.mag() < queryRadius) {
+					float d = PVector.dist(member.getPosition(), targetPosition); 
+					if (d < queryRadius) {
 						neighbors.add(member);
 					}
 				}
@@ -147,7 +147,7 @@ public class CellSpacePartition<T extends Boid> {
 	}
 	
 	/**
-	 * Removes all entites from the cells of this space partition.
+	 * Removes all entities from the cells of this space partition.
 	 */
 	public void clear() {
 		for (Cell<T> cell : cells) {
