@@ -79,7 +79,6 @@ public class Flocking extends PApplet {
 	}
 
 	public static void main(String[] args) {
-		//PApplet.main(new String[] {"--present", "com.jbromley.processing.Flocking"});
 		if (args.length == 0) {
 			PApplet.main(new String[] {"com.jbromley.processing.Flocking"});
 		} else {
