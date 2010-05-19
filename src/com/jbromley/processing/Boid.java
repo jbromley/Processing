@@ -19,15 +19,13 @@ public class Boid {
 	private static final float WANDER_DISTANCE = 2.0f;
 	private static final float WANDER_JITTER = 40.0f;
 	private static final float NEIGHBORHOOD_SIZE = 25.0f;
+	private static final float BOID_SEPARATION = 20.0f;
 
 	private PVector position;
 	private PVector velocity;
 	private PVector accel;
 
 	private PVector wanderTarget;
-	private float wanderJitter;
-	private float wanderRadius;
-	private float wanderDistance;
 	
 	private PVector feelers[] = new PVector[3];
 	
@@ -72,14 +70,9 @@ public class Boid {
 							 parent.random(0, 256));
 		throbOffset = (int) parent.random(0, THROB_PERIOD);
 
-		// Set up wandering parameters.
-		wanderJitter = WANDER_JITTER;
-		wanderRadius = WANDER_RADIUS;
-		wanderDistance = WANDER_DISTANCE;
-		
 		float theta = parent.random(1.0f) * PApplet.TWO_PI;
-		wanderTarget = new PVector(wanderRadius * PApplet.cos(theta),
-								   wanderRadius * PApplet.sin(theta));
+		wanderTarget = new PVector(WANDER_RADIUS * PApplet.cos(theta),
+								   WANDER_RADIUS * PApplet.sin(theta));
 	}
 	
 	public PVector getPosition() {
@@ -90,9 +83,11 @@ public class Boid {
 	 * Advances the state of the boid through a single step
 	 * @param boids a list of all Boids
 	 */
-	public void update(ArrayList<Boid> boids) {
+	public void update(CellSpacePartition<Boid> boids) {
+		PVector oldPosition = position.get();
 		flock(boids);
 		updateMotion();
+		boids.updateEntity(this, oldPosition);
 		//enforceNoOverlap(boids);
 		render();
 	}
@@ -101,7 +96,7 @@ public class Boid {
 	 * Calculates and weights the forces from all steering forces.
 	 * @param boids a list of all boids
 	 */
-	private void flock(ArrayList<Boid> boids) {
+	private void flock(CellSpacePartition<Boid> boids) {
 		PVector separation = separate(boids);
 		PVector alignment = align(boids);
 		PVector cohesion = cohesion(boids);
@@ -111,13 +106,14 @@ public class Boid {
 		// Weight the steering forces.
 		separation.mult(1.5f);
 		cohesion.mult(0.5f);
+		avoidWalls.mult(1.5f);
 
 		// Add the force vectors to acceleration.
 		accel.add(separation);
 		accel.add(alignment);
-		accel.add(PVector.mult(cohesion, 1.5f));
+		accel.add(cohesion);
 		accel.add(wander);
-		accel.add(PVector.mult(avoidWalls, 1.5f));
+		accel.add(avoidWalls);
 	}
 
 	/**
@@ -271,13 +267,13 @@ public class Boid {
 	 * Adds a small amount of random wandering to a boid's path.
 	 */
 	private PVector wander() {
-		float jitter = wanderJitter * (1.0f / parent.frameRate);
+		float jitter = WANDER_JITTER * (1.0f / parent.frameRate);
 		wanderTarget.add(new PVector(parent.random(-1.0f, 1.0f) * jitter,
 						 parent.random(-1.0f, 1.0f) * jitter));
 		wanderTarget.normalize();
-		wanderTarget.mult(wanderRadius);
+		wanderTarget.mult(WANDER_RADIUS);
 		PVector target = wanderTarget;
-		target.add(new PVector(wanderDistance, 0.0f));
+		target.add(new PVector(WANDER_DISTANCE, 0.0f));
 		PVector worldTarget = pointToWorldSpace(position, velocity, target);
 
 		return steer(worldTarget, false);
@@ -347,15 +343,13 @@ public class Boid {
 	 * @param boids a list of all boids
 	 * @return the steering force to keep this boid separated from the flock
 	 */
-	private PVector separate(ArrayList<Boid> boids) {
-		float desiredSeparation = 20.0f;
-		PVector steer = new PVector(0,0,0);
+	private PVector separate(CellSpacePartition<Boid> boids) {
+		PVector steer = new PVector(0, 0);
 		int count = 0;
-		for (Boid other : boids) {
+		ArrayList<Boid> neighbors = boids.getNeighborList(position, BOID_SEPARATION);
+		for (Boid other : neighbors) {
 			float d = PVector.dist(position, other.position);
-			// If the distance is greater than 0 and less than an arbitrary 
-			// amount (0 when you are yourself).
-			if (d > 0 && d < desiredSeparation) {
+			if (d > 0 && d < BOID_SEPARATION) {
 				// Calculate vector pointing away from neighbor
 				PVector diff = PVector.sub(position,other.position);
 				diff.normalize();
@@ -364,14 +358,12 @@ public class Boid {
 				count++;
 			}
 		}
-		// Average -- divide by how many
+
 		if (count > 0) {
 			steer.div((float)count);
 		}
 
-		// As long as the vector is greater than 0
 		if (steer.mag() > 0) {
-			// Implement Reynolds: Steering = Desired - Velocity
 			steer.normalize();
 			steer.mult(maxSpeed);
 			steer.sub(velocity);
@@ -380,20 +372,19 @@ public class Boid {
 		return steer;
 	}
 
-	  // Alignment
-	  // For every nearby boid in the system, calculate the average velocity
 	/**
 	 * Aligns the boid with the average velocity of nearby boids.
 	 * @param boids a list of all boids
 	 * @return a vector aligned with the flock's average velocity
 	 */
-	private PVector align (ArrayList<Boid> boids) {
-		float neighborDist = NEIGHBORHOOD_SIZE;
-		PVector steer = new PVector(0,0,0);
+	private PVector align (CellSpacePartition<Boid> boids) {
+		PVector steer = new PVector(0, 0);
 		int count = 0;
-		for (Boid other : boids) {
+		ArrayList<Boid> neighbors = boids.getNeighborList(position, NEIGHBORHOOD_SIZE);
+//		System.out.println("DEBUG (Boid.align): " + neighbors.size() + " neighbors");
+		for (Boid other : neighbors) {
 			float d = PVector.dist(position, other.position);
-			if (d > 0 && d < neighborDist) {
+			if (d > 0 && d < NEIGHBORHOOD_SIZE) {
 				steer.add(other.velocity);
 				count++;
 			}
@@ -402,7 +393,6 @@ public class Boid {
 			steer.div((float) count);
 		}
 
-		// As long as the vector is greater than 0
 		if (steer.mag() > 0) {
 			steer.normalize();
 			steer.mult(maxSpeed);
@@ -412,20 +402,18 @@ public class Boid {
 		return steer;
 	}
 
-	// Cohesion
-	// For the average location (i.e. center) of all nearby boids, calculate steering vector towards that location
 	/**
 	 * Calculates steering vector towards average position of neighbors.
 	 * @param boids a list of all boids
 	 * @return steering force to go towards average position of neighbors
 	 */
-	private PVector cohesion (ArrayList<Boid> boids) {
-		float neighborDist = NEIGHBORHOOD_SIZE;
-		PVector sum = new PVector(0,0);
+	private PVector cohesion (CellSpacePartition<Boid> boids) {
+		PVector sum = new PVector(0, 0);
 		int count = 0;
-		for (Boid other : boids) {
+		ArrayList<Boid> neighbors = boids.getNeighborList(position, NEIGHBORHOOD_SIZE);
+		for (Boid other : neighbors) {
 			float d = position.dist(other.position);
-			if ((d > 0) && (d < neighborDist)) {
+			if (d > 0 && d < NEIGHBORHOOD_SIZE) {
 				sum.add(other.position);
 				count++;
 			}

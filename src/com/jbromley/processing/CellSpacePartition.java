@@ -61,7 +61,7 @@ public class CellSpacePartition<T extends Boid> {
 	private float spaceHeight;
 	private int numberCellsX;
 	private int numberCellsY;
-	private int maxEntities;
+	//private int maxEntities;
 	private float cellWidth;
 	private float cellHeight;
 	
@@ -73,13 +73,13 @@ public class CellSpacePartition<T extends Boid> {
 	 * @param cellsY the number of vertical cells
 	 * @param maxEntities the maximum number of entities to allow in a cell
 	 */
-	public CellSpacePartition(float width, float height, int cellsX, int cellsY,
-			int maxMembers) {
+	public CellSpacePartition(float width, float height, int cellsX, int cellsY) {
+		cells = new ArrayList<CellSpacePartition.Cell<T>>();
 		spaceWidth = width;
 		spaceHeight = height;
 		numberCellsX = cellsX;
 		numberCellsY = cellsY;
-		maxEntities = maxMembers;
+		//maxEntities = maxMembers;
 		
 		cellWidth = spaceWidth / numberCellsX;
 		cellHeight = spaceHeight / numberCellsY;
@@ -101,7 +101,8 @@ public class CellSpacePartition<T extends Boid> {
 	 */
 	public void addEntity(T entity) {
 		int index = positionToIndex(entity.getPosition());
-		cells.get(index).members.add(entity);
+		Cell<T> cell = cells.get(index);
+		cell.members.add(entity);
 	}
 	
 	/**
@@ -112,10 +113,17 @@ public class CellSpacePartition<T extends Boid> {
 	public void updateEntity(T entity, PVector oldPosition) {
 		int oldIndex = positionToIndex(oldPosition);
 		int newIndex = positionToIndex(entity.getPosition());
+
+//		System.out.println("DEBUG (CellSpacePartition.updateEntity): " +
+//				oldIndex + " -> " + newIndex);
 		
 		if (oldIndex != newIndex) {
-			cells.get(oldIndex).members.remove(entity);
-			cells.get(newIndex).members.add(entity);
+			Cell<T> oldCell = cells.get(oldIndex);
+			Cell<T> newCell = cells.get(newIndex);
+			oldCell.members.remove(entity);
+			newCell.members.add(entity);
+//			System.out.println("DEBUG (CellSpacePartition.updateEntity): cell " +
+//			 		newIndex + " has " + newCell.members.size() + " members");
 		}
 	}
 	
@@ -133,9 +141,11 @@ public class CellSpacePartition<T extends Boid> {
 		// query box. If it does overlap and it contains entities, do further
 		// proximity tests.
 		for (Cell<T> cell : cells) {
+//			System.out.println("DEBUG (CellSpacePartition.getNeighborList): cell " +
+//					cell.boundingBox + " has " + cell.members.size() + " members");
 			if (!cell.members.isEmpty() && cell.boundingBox.intersects(queryBox)) {
 				for (T member : cell.members) {
-					float d = PVector.dist(member.getPosition(), targetPosition); 
+					float d = PVector.dist(member.getPosition(), targetPosition);
 					if (d < queryRadius) {
 						neighbors.add(member);
 					}
@@ -143,11 +153,14 @@ public class CellSpacePartition<T extends Boid> {
 			}
 		}
 		
+//		System.out.println("DEBUG (CellSpacePartition.getNeighborList): " + 
+//				neighbors.size() + " members in " + intersectingCells + " cells");
+		
 		return neighbors;
 	}
 	
 	/**
-	 * Removes all entities from the cells of this space partition.
+	 * Removes all entites from the cells of this space partition.
 	 */
 	public void clear() {
 		for (Cell<T> cell : cells) {
@@ -162,7 +175,7 @@ public class CellSpacePartition<T extends Boid> {
 	 */
 	private int positionToIndex(final PVector position) {
 		int index = (int) (position.x / cellWidth) + 
-				(int) (position.y / cellHeight * numberCellsX);
+				(int) (position.y / cellHeight) * numberCellsX;
 		
 		// If the entity is exactly in the bottom right corner of the space, we
 		// have to adjust down.

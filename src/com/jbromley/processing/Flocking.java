@@ -15,7 +15,7 @@ public class Flocking extends PApplet {
 	
 	private static final long serialVersionUID = 9221726134245604843L;
 
-	private static final int INITIAL_BOIDS = 250;
+	private static final int INITIAL_BOIDS = 1500;
 	
 	private Flock flock = null;
 	private ArrayList<Line2D.Float> walls = null;
@@ -35,7 +35,7 @@ public class Flocking extends PApplet {
 		walls.add(new Line2D.Float(0.0f, 799.0f, 0.0f, 0.0f));
 		//walls.add(new Line2D.Float(640.0f, 200.0f, 640.0f, 600.0f));
 		
-		flock = new Flock();
+		flock = new Flock(this);
 		
 		for (int i = 0; i < INITIAL_BOIDS; ++i) {
 			flock.addBoid(new Boid(new PVector(width / 2, height / 2), 
