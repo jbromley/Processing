@@ -98,8 +98,9 @@ public class Boid {
 	 */
 	private void flock(CellSpacePartition<Boid> boids) {
 		PVector separation = separate(boids);
-		PVector alignment = align(boids);
-		PVector cohesion = cohesion(boids);
+		ArrayList<Boid> neighbors = boids.getNeighborList(position, NEIGHBORHOOD_SIZE);
+		PVector alignment = align(neighbors);
+		PVector cohesion = cohesion(neighbors);
 		PVector wander = wander();
 		PVector avoidWalls = avoidWalls();
 		
@@ -374,14 +375,13 @@ public class Boid {
 
 	/**
 	 * Aligns the boid with the average velocity of nearby boids.
-	 * @param boids a list of all boids
+	 * @param neighbors a list of all neighbors of this boid
 	 * @return a vector aligned with the flock's average velocity
 	 */
-	private PVector align (CellSpacePartition<Boid> boids) {
+	private PVector align (ArrayList<Boid> neighbors) {
 		PVector steer = new PVector(0, 0);
 		int count = 0;
-		ArrayList<Boid> neighbors = boids.getNeighborList(position, NEIGHBORHOOD_SIZE);
-//		System.out.println("DEBUG (Boid.align): " + neighbors.size() + " neighbors");
+
 		for (Boid other : neighbors) {
 			float d = PVector.dist(position, other.position);
 			if (d > 0 && d < NEIGHBORHOOD_SIZE) {
@@ -389,6 +389,7 @@ public class Boid {
 				count++;
 			}
 		}
+
 		if (count > 0) {
 			steer.div((float) count);
 		}
@@ -404,13 +405,13 @@ public class Boid {
 
 	/**
 	 * Calculates steering vector towards average position of neighbors.
-	 * @param boids a list of all boids
+	 * @param neighbors a list of all neighbors of this boid
 	 * @return steering force to go towards average position of neighbors
 	 */
-	private PVector cohesion (CellSpacePartition<Boid> boids) {
+	private PVector cohesion (ArrayList<Boid> neighbors) {
 		PVector sum = new PVector(0, 0);
 		int count = 0;
-		ArrayList<Boid> neighbors = boids.getNeighborList(position, NEIGHBORHOOD_SIZE);
+
 		for (Boid other : neighbors) {
 			float d = position.dist(other.position);
 			if (d > 0 && d < NEIGHBORHOOD_SIZE) {

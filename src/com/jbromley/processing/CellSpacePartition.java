@@ -61,7 +61,6 @@ public class CellSpacePartition<T extends Boid> {
 	private float spaceHeight;
 	private int numberCellsX;
 	private int numberCellsY;
-	//private int maxEntities;
 	private float cellWidth;
 	private float cellHeight;
 	
@@ -79,7 +78,6 @@ public class CellSpacePartition<T extends Boid> {
 		spaceHeight = height;
 		numberCellsX = cellsX;
 		numberCellsY = cellsY;
-		//maxEntities = maxMembers;
 		
 		cellWidth = spaceWidth / numberCellsX;
 		cellHeight = spaceHeight / numberCellsY;
@@ -114,16 +112,11 @@ public class CellSpacePartition<T extends Boid> {
 		int oldIndex = positionToIndex(oldPosition);
 		int newIndex = positionToIndex(entity.getPosition());
 
-//		System.out.println("DEBUG (CellSpacePartition.updateEntity): " +
-//				oldIndex + " -> " + newIndex);
-		
 		if (oldIndex != newIndex) {
 			Cell<T> oldCell = cells.get(oldIndex);
 			Cell<T> newCell = cells.get(newIndex);
 			oldCell.members.remove(entity);
 			newCell.members.add(entity);
-//			System.out.println("DEBUG (CellSpacePartition.updateEntity): cell " +
-//			 		newIndex + " has " + newCell.members.size() + " members");
 		}
 	}
 	
@@ -141,8 +134,6 @@ public class CellSpacePartition<T extends Boid> {
 		// query box. If it does overlap and it contains entities, do further
 		// proximity tests.
 		for (Cell<T> cell : cells) {
-//			System.out.println("DEBUG (CellSpacePartition.getNeighborList): cell " +
-//					cell.boundingBox + " has " + cell.members.size() + " members");
 			if (!cell.members.isEmpty() && cell.boundingBox.intersects(queryBox)) {
 				for (T member : cell.members) {
 					float d = PVector.dist(member.getPosition(), targetPosition);
@@ -152,9 +143,6 @@ public class CellSpacePartition<T extends Boid> {
 				}
 			}
 		}
-		
-//		System.out.println("DEBUG (CellSpacePartition.getNeighborList): " + 
-//				neighbors.size() + " members in " + intersectingCells + " cells");
 		
 		return neighbors;
 	}
