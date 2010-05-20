@@ -120,28 +120,35 @@ public class CellSpacePartition<T extends Boid> {
 		}
 	}
 	
-	public ArrayList<T> getNeighborList(PVector targetPosition, float queryRadius) {
+	public ArrayList<T> getNeighborList(PVector target, float queryRadius) {
 		ArrayList<T> neighbors = new ArrayList<T>();
+
+		// Get the indices of the top left and bottom right cells.
+		float x = Math.max(0.0f, target.x - queryRadius);
+		float y = Math.max(0.0f, target.y - queryRadius);
+		PVector topLeft = new PVector(x, y);
+		x = Math.min(spaceWidth, target.x + queryRadius);
+		y = Math.min(spaceHeight, target.y + queryRadius);
+		PVector bottomRight = new PVector(x, y);
 		
-		// Create the bounding box for the query.
-		float left = targetPosition.x - queryRadius;
-		float top = targetPosition.y - queryRadius;
-		float width = 2.0f * queryRadius;
-		float height = 2.0f * queryRadius;
-		Rectangle2D.Float queryBox = new Rectangle2D.Float(left, top, width, height);
+		int firstIndex = positionToIndex(topLeft);
+		int lastIndex = positionToIndex(bottomRight);
+		int index = firstIndex;
 		
-		// Iterate over each cell and test if its bounding box overlaps the
-		// query box. If it does overlap and it contains entities, do further
-		// proximity tests.
-		for (Cell<T> cell : cells) {
-			if (!cell.members.isEmpty() && cell.boundingBox.intersects(queryBox)) {
-				for (T member : cell.members) {
-					float d = PVector.dist(member.getPosition(), targetPosition);
-					if (d < queryRadius) {
-						neighbors.add(member);
+		while (index < lastIndex) {
+			int rowLast = lastIndex - (int) ((lastIndex - index) / numberCellsX) * numberCellsX;
+			for (int i = index; i <= rowLast; ++i){
+				Cell<T> cell = cells.get(index);
+				if (!cell.members.isEmpty()) {
+					for (T member : cell.members) {
+						float d = PVector.dist(member.getPosition(), target);
+						if (d < queryRadius) {
+							neighbors.add(member);
+						}
 					}
 				}
 			}
+			index += numberCellsX;
 		}
 		
 		return neighbors;
