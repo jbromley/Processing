@@ -15,7 +15,7 @@ import processing.core.PVector;
 public class Boid {
 	
 	private static final int THROB_PERIOD = 250;
-	private static final float WANDER_RADIUS = 1.2f;
+	private static final float WANDER_RADIUS = 1.0f;
 	private static final float WANDER_DISTANCE = 2.0f;
 	private static final float WANDER_JITTER = 40.0f;
 	private static final float NEIGHBORHOOD_SIZE = 25.0f;
