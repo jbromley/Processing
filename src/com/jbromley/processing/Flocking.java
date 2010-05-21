@@ -15,7 +15,7 @@ public class Flocking extends PApplet {
 	
 	private static final long serialVersionUID = 9221726134245604843L;
 
-	private static final int INITIAL_BOIDS = 500;
+	private static final int INITIAL_BOIDS = 1000;
 	
 	private Flock flock = null;
 	private ArrayList<Line2D.Float> walls = null;
