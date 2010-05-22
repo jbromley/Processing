@@ -17,9 +17,9 @@ public class Boid {
 	private static final int THROB_PERIOD = 250;
 	private static final float WANDER_RADIUS = 1.0f;
 	private static final float WANDER_DISTANCE = 2.0f;
-	private static final float WANDER_JITTER = 40.0f;
-	private static final float NEIGHBORHOOD_SIZE = 25.0f;
-	private static final float BOID_SEPARATION = 20.0f;
+	private static final float WANDER_JITTER = 20.0f;
+	private static final float NEIGHBORHOOD_SIZE = 32.0f;
+	private static final float BOID_SEPARATION = 24.0f;
 
 	private PVector position;
 	private PVector velocity;
@@ -248,7 +248,7 @@ public class Boid {
 	}
 	
 	private void createFeelers() {
-		final float FEELER_LENGTH = 32.0f;
+		final float FEELER_LENGTH = 16.0f;
 		
 		feelers[0] = PVector.add(position, PVector.mult(velocity, FEELER_LENGTH));
 		
