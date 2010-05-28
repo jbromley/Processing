@@ -15,7 +15,7 @@ public class Flocking extends PApplet {
 	
 	private static final long serialVersionUID = 9221726134245604843L;
 
-	private static final int INITIAL_BOIDS = 750;
+	private static final int INITIAL_BOIDS = 1000;
 	
 	private Flock flock = null;
 	private ArrayList<Line2D.Float> walls = null;
@@ -25,14 +25,23 @@ public class Flocking extends PApplet {
 	 * Creates the flock boids demo. 
 	 */
 	public void setup() {
-		size(1280, 800);
+		size(1920, 1080, P3D);
 		
 		// Create walls
+		float d = 160.0f;
 		walls = new ArrayList<Line2D.Float>();
-		walls.add(new Line2D.Float(0.0f, 0.0f, 1279.0f, 0.0f));
-		walls.add(new Line2D.Float(1279.0f, 0.0f, 1279.0f, 799.0f));
-		walls.add(new Line2D.Float(1279.0f, 799.0f, 0.0f, 799.0f));
-		walls.add(new Line2D.Float(0.0f, 799.0f, 0.0f, 0.0f));
+		walls.add(new Line2D.Float(d, 1, width - d, 1));
+		walls.add(new Line2D.Float(width - d, 1, width - 1, d));
+		walls.add(new Line2D.Float(width - 1, d, width - 1, height - d));
+		walls.add(new Line2D.Float(width - 1, height - d, width - d, height - 1));
+		walls.add(new Line2D.Float(width - d, height - 1, d, height - 1));
+		walls.add(new Line2D.Float(d, height - 1, 1, height - d));
+		walls.add(new Line2D.Float(1, height - d, 1, d));
+		walls.add(new Line2D.Float(1, d, d, 1));
+//		walls.add(new Line2D.Float(0.0f, 0.0f, w, 0.0f));
+//		walls.add(new Line2D.Float(w, 0.0f, w, h));
+//		walls.add(new Line2D.Float(w, h, 0.0f, h));
+//		walls.add(new Line2D.Float(0.0f, h, 0.0f, 0.0f));
 		
 		flock = new Flock(this);
 		for (int i = 0; i < INITIAL_BOIDS; ++i) {
@@ -53,10 +62,10 @@ public class Flocking extends PApplet {
 		background(0);
 		flock.update();
 		
-		stroke(255);
-		for (Line2D.Float wall : walls) {
-			line(wall.x1, wall.y1, wall.x2, wall.y2);
-		}
+//		stroke(255);
+//		for (Line2D.Float wall : walls) {
+//			line(wall.x1, wall.y1, wall.x2, wall.y2);
+//		}
 		
 		fill(255);
 		textFont(font);

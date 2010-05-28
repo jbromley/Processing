@@ -56,6 +56,7 @@ public class CellSpacePartition<T extends Boid> {
 	}
 	
 	private ArrayList<CellSpacePartition.Cell<T>> cells;
+	//private CellSpacePartition.Cell<T>[] cells;
 	private ArrayList<Boid> neighbors;
 	private float spaceWidth;
 	private float spaceHeight;

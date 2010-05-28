@@ -24,6 +24,9 @@ public class Boid {
 	private PVector position;
 	private PVector velocity;
 	private PVector accel;
+	private PMatrix2D feelerMatrix1;
+	private PMatrix2D feelerMatrix2;
+	private PMatrix2D coordinateMatrix;
 
 	private PVector wanderTarget;
 	
@@ -63,7 +66,7 @@ public class Boid {
 		position = pos.get();
 		velocity = new PVector(parent.random(-1, 1), parent.random(-1, 1));
 		accel = new PVector(0,0);
-		startRadius = 6.0f;
+		startRadius = 4.0f;
 		maxSpeed = ms;
 		maxForce = mf;
 		color = parent.color(parent.random(0, 256), parent.random(0, 256), 
@@ -73,6 +76,12 @@ public class Boid {
 		float theta = parent.random(1.0f) * PApplet.TWO_PI;
 		wanderTarget = new PVector(WANDER_RADIUS * PApplet.cos(theta),
 								   WANDER_RADIUS * PApplet.sin(theta));
+		feelerMatrix1 = new PMatrix2D();
+		feelerMatrix1.rotate(PApplet.HALF_PI * 3.5f);
+		feelerMatrix2 = new PMatrix2D();
+		feelerMatrix2.rotate(PApplet.HALF_PI * 0.5f);
+		
+		coordinateMatrix = new PMatrix2D();
 	}
 	
 	public PVector getPosition() {
@@ -105,8 +114,9 @@ public class Boid {
 		PVector avoidWalls = avoidWalls();
 		
 		// Weight the steering forces.
+		separation.mult(1.0f);
+		cohesion.mult(0.75f);
 		separation.mult(1.5f);
-		cohesion.mult(0.5f);
 		avoidWalls.mult(1.5f);
 
 		// Add the force vectors to acceleration.
@@ -248,19 +258,19 @@ public class Boid {
 	}
 	
 	private void createFeelers() {
-		final float FEELER_LENGTH = 16.0f;
+		final float FEELER_LENGTH = 8.0f;
 		
 		feelers[0] = PVector.add(position, PVector.mult(velocity, FEELER_LENGTH));
 		
-		PMatrix2D rotateMatrix = new PMatrix2D();
-		rotateMatrix.rotate(PApplet.HALF_PI * 3.5f);
+//		rotateMatrix.reset();
+//		rotateMatrix.rotate(PApplet.HALF_PI * 3.5f);
 		PVector temp = new PVector();
-		rotateMatrix.mult(velocity, temp);
+		feelerMatrix1.mult(velocity, temp);
 		feelers[1] = PVector.add(position, PVector.mult(temp, FEELER_LENGTH / 2.0f));
 		
-		rotateMatrix.set(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-		rotateMatrix.rotate(PApplet.HALF_PI * 0.5f);
-		rotateMatrix.mult(velocity, temp);
+//		rotateMatrix.reset();
+//		rotateMatrix.rotate(PApplet.HALF_PI * 0.5f);
+		feelerMatrix2.mult(velocity, temp);
 		feelers[2] = PVector.add(position, PVector.mult(temp, FEELER_LENGTH / 2.0f));
 	}
 	
@@ -290,11 +300,11 @@ public class Boid {
 	 * @return the point translated to world coordinates
 	 */
 	PVector pointToWorldSpace(PVector position, PVector velocity, PVector localPos) {
-		PMatrix2D m = new PMatrix2D();
-		m.translate(position.x, position.y);
-		m.rotate(velocity.heading2D());
+		coordinateMatrix.reset();
+		coordinateMatrix.translate(position.x, position.y);
+		coordinateMatrix.rotate(velocity.heading2D());
 		PVector worldPos = new PVector();
-		m.mult(localPos, worldPos);
+		coordinateMatrix.mult(localPos, worldPos);
 		return worldPos;
 	}
 

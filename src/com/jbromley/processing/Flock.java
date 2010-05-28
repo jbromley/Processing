@@ -22,7 +22,7 @@ public class Flock {
 	public Flock(PApplet parent) {
 		this.parent = parent;
 		boids = new ArrayList<Boid>();
-		csp = new CellSpacePartition<Boid>(parent.width, parent.height, 16, 10);
+		csp = new CellSpacePartition<Boid>(parent.width, parent.height, 32, 18);
 	}
 	
 	/**
