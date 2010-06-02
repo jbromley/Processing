@@ -1,7 +1,7 @@
 package com.jbromley.processing;
 
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import processing.core.PVector;
 
@@ -22,10 +22,7 @@ public class CellSpacePartition<T extends Boid> {
 	 */
 	private static class Cell<T> {
 		/** The entities contained by the cell. */
-		public ArrayList<T> members;
-		
-		/** The bounding box for the cell. */
-		public Rectangle2D.Float boundingBox;
+		public LinkedList<T> members;
 		
 		/** 
 		 * Creates a new cell with the given corners. Note that the result is 
@@ -35,9 +32,7 @@ public class CellSpacePartition<T extends Boid> {
 		 * @param bottomRight the coordinate of the bottom right corner of the cell
 		 */
 		public Cell(PVector topLeft, PVector bottomRight) {
-			members = new ArrayList<T>();
-			boundingBox = new Rectangle2D.Float(topLeft.x, topLeft.y,
-					bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
+			members = new LinkedList<T>();
 		}
 		
 		/**
@@ -50,14 +45,11 @@ public class CellSpacePartition<T extends Boid> {
 		 * @param bottom the y-coordinate of the bottom of the cell
 		 */
 		public Cell(float left, float top, float right, float bottom) {
-			members = new ArrayList<T>();
-			boundingBox = new Rectangle2D.Float(left, top, right - left, bottom - top);
+			members = new LinkedList<T>();
 		}
 	}
 	
 	private ArrayList<CellSpacePartition.Cell<T>> cells;
-	//private CellSpacePartition.Cell<T>[] cells;
-	private ArrayList<Boid> neighbors;
 	private float spaceWidth;
 	private float spaceHeight;
 	private int numberCellsX;
@@ -87,8 +79,8 @@ public class CellSpacePartition<T extends Boid> {
 			for (int x = 0; x < numberCellsX; ++x) {
 				float top = y * cellHeight;
 				float left = x * cellWidth;
-				float bottom = top + cellHeight;
-				float right = left + cellWidth;
+				float bottom = top + cellHeight - 1.0f;
+				float right = left + cellWidth - 1.0f;
 				cells.add(new Cell<T>(left, top, right, bottom));
 			}
 		}
@@ -127,15 +119,13 @@ public class CellSpacePartition<T extends Boid> {
 		// Get the indices of the top left and bottom right cells.
 		float x = Math.max(0.0f, target.x - queryRadius);
 		float y = Math.max(0.0f, target.y - queryRadius);
-		PVector topLeft = new PVector(x, y);
+		int firstIndex = positionToIndex(x, y);
+		
 		x = Math.min(spaceWidth, target.x + queryRadius);
 		y = Math.min(spaceHeight, target.y + queryRadius);
-		PVector bottomRight = new PVector(x, y);
-		
-		int firstIndex = positionToIndex(topLeft);
-		int lastIndex = positionToIndex(bottomRight);
+		int lastIndex = positionToIndex(x, y);
+
 		int index = firstIndex;
-		
 		while (index < lastIndex) {
 			int rowLast = lastIndex - (int) ((lastIndex - index) / numberCellsX) * numberCellsX;
 			for (int i = index; i <= rowLast; ++i){
@@ -172,6 +162,24 @@ public class CellSpacePartition<T extends Boid> {
 	private int positionToIndex(final PVector position) {
 		int index = (int) (position.x / cellWidth) + 
 				(int) (position.y / cellHeight) * numberCellsX;
+		
+		// If the entity is exactly in the bottom right corner of the space, we
+		// have to adjust down.
+		if (index > cells.size() - 1) {
+			index = cells.size() - 1;
+		}
+			
+		return index;
+	}
+
+	/**
+	 * Converts the given position into an index into the cell space partition.
+	 * @param x the x-coordinate of the position to index
+	 * @param y the y-coordinate of the position to index
+	 * @return the index of the cell in the partition containing the position
+	 */
+	private int positionToIndex(final float x, final float y) {
+		int index = (int) (x / cellWidth) + (int) (y / cellHeight) * numberCellsX;
 		
 		// If the entity is exactly in the bottom right corner of the space, we
 		// have to adjust down.

@@ -11,7 +11,6 @@ import processing.core.PApplet;
  */
 public class Flock {
 
-	private PApplet parent;
 	private CellSpacePartition<Boid> csp;
 	private ArrayList<Boid> boids;
 	
@@ -20,7 +19,6 @@ public class Flock {
 	 * @param parent the PApplet that hosts this class
 	 */
 	public Flock(PApplet parent) {
-		this.parent = parent;
 		boids = new ArrayList<Boid>();
 		csp = new CellSpacePartition<Boid>(parent.width, parent.height, 32, 18);
 	}
