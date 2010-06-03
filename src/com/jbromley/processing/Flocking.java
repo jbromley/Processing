@@ -21,11 +21,19 @@ public class Flocking extends PApplet {
 	private ArrayList<Line2D.Float> walls = null;
 	private PFont font = null;
 	
+	private float alignment = 1.0f;
+	private float cohesion = 1.0f;
+	private float separation = 1.0f;
+	private float neighborhoodSize = 25.0f;
+	private float separationDistance = 20.0f;
+	private boolean useWalls = true;
+	private boolean showInfo = true;
+	
 	/**
 	 * Creates the flock boids demo. 
 	 */
 	public void setup() {
-		size(1920, 1080, P3D);
+		size(screen.width, screen.height, P3D);
 		
 		// Create walls
 		float d = 160.0f;
@@ -67,9 +75,16 @@ public class Flocking extends PApplet {
 //			line(wall.x1, wall.y1, wall.x2, wall.y2);
 //		}
 		
-		fill(255);
-		textFont(font);
-		text("" + frameRate + " fps", 16, height - 16);
+		if (showInfo) {
+			String info = String.format("%1$4.1f fps  alignment: %2$4.1f  " +
+					"cohesion: %3$4.1f  separation: %4$4.1f  " +
+					"neighborhood: %5$4.1f  separation: %6$4.1f", frameRate,
+					alignment, cohesion, separation, neighborhoodSize, 
+					separationDistance);
+			fill(255);
+			textFont(font);
+			text(info, 16, 36);
+		}
 	}
 	
 	/**
@@ -78,6 +93,73 @@ public class Flocking extends PApplet {
 	 */
 	public void mousePressed() {
 		flock.addBoid(new Boid(new PVector(mouseX, mouseY), 2.0f, 0.05f, this));
+	}
+	
+	public void keyPressed() {
+		switch (key) {
+		case 'Z': alignment -= 1.0f; break;
+		case 'z': alignment -= 0.1f; break;
+		case 'a': alignment += 0.1f; break;
+		case 'A': alignment += 1.0f; break;
+		
+		case 'C': cohesion -= 1.0f; break;
+		case 'c': cohesion -= 0.1f; break;
+		case 'd': cohesion += 0.1f; break;
+		case 'D': cohesion += 1.0f; break;
+		
+		case 'X': separation -= 1.0f; break;
+		case 'x': separation -= 0.1f; break;
+		case 's': separation += 0.1f; break;
+		case 'S': separation += 1.0f; break;
+		
+		case 'N':
+		case 'n':
+			neighborhoodSize -= 1.0f;
+			break;
+		case 'h':
+		case 'H':
+			neighborhoodSize += 1.0f;
+			break;
+			
+		case 'M':
+		case 'm':
+			separationDistance -= 1.0f;
+			break;
+		case 'j':
+		case 'J':
+			separationDistance += 1.0f;
+			break;
+			
+		case 'w': useWalls = !useWalls; break;
+		case 'i': showInfo = !showInfo; break;
+
+		default:
+			break;
+		}
+	}
+
+	public float getAlignment() {
+		return alignment;
+	}
+	
+	public float getCohesion() {
+		return cohesion;
+	}
+	
+	public float getSeparation() {
+		return separation;
+	}
+	
+	public float getNeighborhoodSize() {
+		return neighborhoodSize;
+	}
+	
+	public float getSeparationDistance() {
+		return separationDistance;
+	}
+	
+	public boolean getUseWalls() {
+		return useWalls;
 	}
 	
 	/**

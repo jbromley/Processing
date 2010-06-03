@@ -114,9 +114,9 @@ public class Boid {
 		PVector avoidWalls = avoidWalls();
 		
 		// Weight the steering forces.
-		separation.mult(1.0f);
-		cohesion.mult(0.75f);
-		separation.mult(1.5f);
+		alignment.mult(parent.getAlignment());
+		cohesion.mult(parent.getCohesion());
+		separation.mult(parent.getSeparation());
 		avoidWalls.mult(1.5f);
 
 		// Add the force vectors to acceleration.
@@ -124,7 +124,9 @@ public class Boid {
 		accel.add(alignment);
 		accel.add(cohesion);
 		accel.add(wander);
-		accel.add(avoidWalls);
+		if (parent.getUseWalls()) {
+			accel.add(avoidWalls);
+		}
 	}
 
 	/**
@@ -140,6 +142,10 @@ public class Boid {
 		velocity.limit(maxSpeed);
 		
 		position.add(velocity);
+		
+		if (!parent.getUseWalls()){
+			checkBoundaries();
+		}
 
 		// Reset the acceleration for the next step.
 		accel.mult(0);
