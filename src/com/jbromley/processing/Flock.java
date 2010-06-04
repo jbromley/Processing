@@ -24,7 +24,14 @@ public class Flock {
 	public Flock(Flocking owner) {
 		parent = owner;
 		boids = new ArrayList<Boid>();
-		csp = new CellSpacePartition<Boid>(parent.width, parent.height, 32, 18);
+		
+		// Size the cells so that we never have to search more than four cells.
+		float cellSize = 2.0f * Boid.getNeighborhoodSize();
+		int cellsX = (int) (parent.width / cellSize);
+		int cellsY = (int) (parent.height / cellSize);
+		
+		csp = new CellSpacePartition<Boid>(parent.width, parent.height, 
+				cellsX, cellsY);
 	}
 	
 	/**
