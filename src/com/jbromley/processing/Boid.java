@@ -18,8 +18,12 @@ public class Boid {
 	private static final float WANDER_RADIUS = 1.0f;
 	private static final float WANDER_DISTANCE = 2.0f;
 	private static final float WANDER_JITTER = 20.0f;
-	private static final float NEIGHBORHOOD_SIZE = 32.0f;
-	private static final float BOID_SEPARATION = 24.0f;
+	
+	private static float alignment = 1.0f;
+	private static float cohesion = 0.5f;
+	private static float separation = 1.5f;
+	private static float neighborhoodSize = 32.0f;
+	private static float separationDistance = 24.0f;
 
 	private PVector position;
 	private PVector velocity;
@@ -87,7 +91,11 @@ public class Boid {
 	public PVector getPosition() {
 		return position;
 	}
-
+	
+	public void setPosition(PVector newPosition) {
+		position = newPosition;
+	}
+	
 	/**
 	 * Advances the state of the boid through a single step
 	 * @param boids a list of all Boids
@@ -97,7 +105,6 @@ public class Boid {
 		flock(boids);
 		updateMotion();
 		boids.updateEntity(this, oldPosition);
-		//enforceNoOverlap(boids);
 		render();
 	}
 
@@ -106,17 +113,18 @@ public class Boid {
 	 * @param boids a list of all boids
 	 */
 	private void flock(CellSpacePartition<Boid> boids) {
+		ArrayList<Boid> neighbors = boids.getNeighborList(position, 
+				getNeighborhoodSize());
 		PVector separation = separate(boids);
-		ArrayList<Boid> neighbors = boids.getNeighborList(position, NEIGHBORHOOD_SIZE);
 		PVector alignment = align(neighbors);
 		PVector cohesion = cohesion(neighbors);
 		PVector wander = wander();
 		PVector avoidWalls = avoidWalls();
 		
 		// Weight the steering forces.
-		alignment.mult(parent.getAlignment());
-		cohesion.mult(parent.getCohesion());
-		separation.mult(parent.getSeparation());
+		alignment.mult(getAlignment());
+		cohesion.mult(getCohesion());
+		separation.mult(getSeparation());
 		avoidWalls.mult(1.5f);
 
 		// Add the force vectors to acceleration.
@@ -142,7 +150,7 @@ public class Boid {
 		velocity.limit(maxSpeed);
 		
 		position.add(velocity);
-		
+
 		if (!parent.getUseWalls()){
 			checkBoundaries();
 		}
@@ -362,22 +370,21 @@ public class Boid {
 	 */
 	private PVector separate(CellSpacePartition<Boid> boids) {
 		PVector steer = new PVector(0, 0);
-		int count = 0;
-		ArrayList<Boid> neighbors = boids.getNeighborList(position, BOID_SEPARATION);
+		float separationRadius = getSeparationDistance();
+		ArrayList<Boid> neighbors = boids.getNeighborList(position,
+				separationRadius);
 		for (Boid other : neighbors) {
-			float d = PVector.dist(position, other.position);
-			if (d > 0 && d < BOID_SEPARATION) {
+			if (other != this) {
 				// Calculate vector pointing away from neighbor
 				PVector diff = PVector.sub(position,other.position);
 				diff.normalize();
-				diff.div(d);
+				diff.div(PVector.dist(position, other.position));
 				steer.add(diff);
-				count++;
 			}
 		}
 
-		if (count > 0) {
-			steer.div((float)count);
+		if (neighbors.size() > 0) {
+			steer.div(neighbors.size());
 		}
 
 		if (steer.mag() > 0) {
@@ -394,13 +401,12 @@ public class Boid {
 	 * @param neighbors a list of all neighbors of this boid
 	 * @return a vector aligned with the flock's average velocity
 	 */
-	private PVector align (ArrayList<Boid> neighbors) {
+	private PVector align(ArrayList<Boid> neighbors) {
 		PVector steer = new PVector(0, 0);
 		int count = 0;
 
 		for (Boid other : neighbors) {
-			float d = PVector.dist(position, other.position);
-			if (d > 0 && d < NEIGHBORHOOD_SIZE) {
+			if (other != this) {
 				steer.add(other.velocity);
 				count++;
 			}
@@ -424,13 +430,12 @@ public class Boid {
 	 * @param neighbors a list of all neighbors of this boid
 	 * @return steering force to go towards average position of neighbors
 	 */
-	private PVector cohesion (ArrayList<Boid> neighbors) {
+	private PVector cohesion(ArrayList<Boid> neighbors) {
 		PVector sum = new PVector(0, 0);
 		int count = 0;
 
 		for (Boid other : neighbors) {
-			float d = position.dist(other.position);
-			if (d > 0 && d < NEIGHBORHOOD_SIZE) {
+			if (other != this) {
 				sum.add(other.position);
 				count++;
 			}
@@ -446,8 +451,8 @@ public class Boid {
 	/**
 	 * Enforce the non-overlap condition.
 	 */
-	private void enforceNoOverlap(ArrayList<Boid> boids) {
-		for (Boid other : boids) {
+	private void enforceNoOverlap(ArrayList<Boid> neighbors) {
+		for (Boid other : neighbors) {
 			if (this == other) {
 				continue;
 			}
@@ -459,5 +464,45 @@ public class Boid {
 				position.add(PVector.mult(PVector.div(separationVector, distance), overlap));
 			}
 		}
+	}
+
+	public static void setAlignment(float alignment) {
+		Boid.alignment = alignment;
+	}
+
+	public static float getAlignment() {
+		return alignment;
+	}
+
+	public static void setCohesion(float cohesion) {
+		Boid.cohesion = cohesion;
+	}
+
+	public static float getCohesion() {
+		return cohesion;
+	}
+
+	public static void setSeparation(float separation) {
+		Boid.separation = separation;
+	}
+
+	public static float getSeparation() {
+		return separation;
+	}
+
+	public static void setNeighborhoodSize(float neighborhoodSize) {
+		Boid.neighborhoodSize = neighborhoodSize;
+	}
+
+	public static float getNeighborhoodSize() {
+		return neighborhoodSize;
+	}
+
+	public static void setSeparationDistance(float separationDistance) {
+		Boid.separationDistance = separationDistance;
+	}
+
+	public static float getSeparationDistance() {
+		return separationDistance;
 	}
 }

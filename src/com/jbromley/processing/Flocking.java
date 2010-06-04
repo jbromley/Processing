@@ -21,12 +21,8 @@ public class Flocking extends PApplet {
 	private ArrayList<Line2D.Float> walls = null;
 	private PFont font = null;
 	
-	private float alignment = 1.0f;
-	private float cohesion = 1.0f;
-	private float separation = 1.0f;
-	private float neighborhoodSize = 25.0f;
-	private float separationDistance = 20.0f;
 	private boolean useWalls = true;
+	private boolean showWalls = false;
 	private boolean showInfo = true;
 	
 	/**
@@ -36,7 +32,7 @@ public class Flocking extends PApplet {
 		size(screen.width, screen.height, P3D);
 		
 		// Create walls
-		float d = 160.0f;
+		float d = width / 8.0f;
 		walls = new ArrayList<Line2D.Float>();
 		walls.add(new Line2D.Float(d, 1, width - d, 1));
 		walls.add(new Line2D.Float(width - d, 1, width - 1, d));
@@ -70,17 +66,20 @@ public class Flocking extends PApplet {
 		background(0);
 		flock.update();
 		
-//		stroke(255);
-//		for (Line2D.Float wall : walls) {
-//			line(wall.x1, wall.y1, wall.x2, wall.y2);
-//		}
+		if (showWalls) {
+			stroke(255);
+			for (Line2D.Float wall : walls) {
+				line(wall.x1, wall.y1, wall.x2, wall.y2);
+			}
+		}
 		
 		if (showInfo) {
 			String info = String.format("%1$4.1f fps  alignment: %2$4.1f  " +
 					"cohesion: %3$4.1f  separation: %4$4.1f  " +
 					"neighborhood: %5$4.1f  separation: %6$4.1f", frameRate,
-					alignment, cohesion, separation, neighborhoodSize, 
-					separationDistance);
+					Boid.getAlignment(), Boid.getCohesion(), 
+					Boid.getSeparation(), Boid.getNeighborhoodSize(), 
+					Boid.getSeparationDistance());
 			fill(255);
 			textFont(font);
 			text(info, 16, 36);
@@ -97,40 +96,39 @@ public class Flocking extends PApplet {
 	
 	public void keyPressed() {
 		switch (key) {
-		case 'Z': alignment -= 1.0f; break;
-		case 'z': alignment -= 0.1f; break;
-		case 'a': alignment += 0.1f; break;
-		case 'A': alignment += 1.0f; break;
+		case 'Z': Boid.setAlignment(Boid.getAlignment() - 1.0f); break;
+		case 'z': Boid.setAlignment(Boid.getAlignment() - 0.1f); break;
+		case 'a': Boid.setAlignment(Boid.getAlignment() + 0.1f); break;
+		case 'A': Boid.setAlignment(Boid.getAlignment() + 1.0f); break;
 		
-		case 'C': cohesion -= 1.0f; break;
-		case 'c': cohesion -= 0.1f; break;
-		case 'd': cohesion += 0.1f; break;
-		case 'D': cohesion += 1.0f; break;
+		case 'C': Boid.setCohesion(Boid.getCohesion() - 1.0f); break;
+		case 'c': Boid.setCohesion(Boid.getCohesion() - 0.1f); break;
+		case 'd': Boid.setCohesion(Boid.getCohesion() + 0.1f); break;
+		case 'D': Boid.setCohesion(Boid.getCohesion() + 1.0f); break;
 		
-		case 'X': separation -= 1.0f; break;
-		case 'x': separation -= 0.1f; break;
-		case 's': separation += 0.1f; break;
-		case 'S': separation += 1.0f; break;
+		case 'X': Boid.setSeparation(Boid.getSeparation() - 1.0f); break;
+		case 'x': Boid.setSeparation(Boid.getSeparation() - 0.1f); break;
+		case 's': Boid.setSeparation(Boid.getSeparation() + 0.1f); break;
+		case 'S': Boid.setSeparation(Boid.getSeparation() + 1.0f); break;
 		
 		case 'N':
-		case 'n':
-			neighborhoodSize -= 1.0f;
-			break;
+		case 'n': Boid.setNeighborhoodSize(Boid.getNeighborhoodSize() - 1.0f); break;
 		case 'h':
-		case 'H':
-			neighborhoodSize += 1.0f;
-			break;
+		case 'H': Boid.setNeighborhoodSize(Boid.getNeighborhoodSize() + 1.0f); break;
 			
 		case 'M':
-		case 'm':
-			separationDistance -= 1.0f;
-			break;
+		case 'm': Boid.setSeparationDistance(Boid.getSeparationDistance() - 1.0f); break;
 		case 'j':
-		case 'J':
-			separationDistance += 1.0f;
-			break;
+		case 'J': Boid.setSeparationDistance(Boid.getSeparationDistance() + 1.0f); break;
 			
-		case 'w': useWalls = !useWalls; break;
+		case 'w': 
+			useWalls = !useWalls;
+			if (useWalls) {
+				flock.ensureContainment();
+			}
+			break;
+
+		case 'q': showWalls = !showWalls; break;
 		case 'i': showInfo = !showInfo; break;
 
 		default:
@@ -138,26 +136,6 @@ public class Flocking extends PApplet {
 		}
 	}
 
-	public float getAlignment() {
-		return alignment;
-	}
-	
-	public float getCohesion() {
-		return cohesion;
-	}
-	
-	public float getSeparation() {
-		return separation;
-	}
-	
-	public float getNeighborhoodSize() {
-		return neighborhoodSize;
-	}
-	
-	public float getSeparationDistance() {
-		return separationDistance;
-	}
-	
 	public boolean getUseWalls() {
 		return useWalls;
 	}
