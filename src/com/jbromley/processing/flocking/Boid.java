@@ -1,4 +1,4 @@
-package com.jbromley.processing;
+package com.jbromley.processing.flocking;
 
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
@@ -19,8 +19,8 @@ public class Boid {
 	private static final float WANDER_DISTANCE = 2.0f;
 	private static final float WANDER_JITTER = 80.0f;
 	
-	private static float alignment = 1.0f;
-	private static float cohesion = 0.5f;
+	private static float alignment = 1.5f;
+	private static float cohesion = 1.0f;
 	private static float separation = 1.5f;
 	private static float neighborhoodSize = 32.0f;
 	private static float separationDistance = 24.0f;
@@ -104,6 +104,11 @@ public class Boid {
 		PVector oldPosition = position.get();
 		flock(boids);
 		updateMotion();
+
+//		ArrayList<Boid> neighbors = boids.getNeighborList(position, 
+//				getNeighborhoodSize());
+//		enforceNoOverlap(neighbors);
+		
 		boids.updateEntity(this, oldPosition);
 		render();
 	}
@@ -157,22 +162,6 @@ public class Boid {
 
 		// Reset the acceleration for the next step.
 		accel.mult(0);
-	}
-
-	/**
-	 * Applies a steering force towards the given target.
-	 * @param target the point towards which the boid should steer
-	 */
-	private void seek(PVector target) {
-		accel.add(steer(target, false));
-	}
-
-	/**
-	 * Applies a braking force when approaching the target.
-	 * @param target the point at which the boid should arrive
-	 */
-	private void arrive(PVector target) {
-		accel.add(steer(target,true));
 	}
 
 	/**
@@ -443,23 +432,23 @@ public class Boid {
 		return sum;
 	}
 	
-	/**
-	 * Enforce the non-overlap condition.
-	 */
-	private void enforceNoOverlap(ArrayList<Boid> neighbors) {
-		for (Boid other : neighbors) {
-			if (this == other) {
-				continue;
-			}
-			
-			PVector separationVector = PVector.sub(position, other.position);
-			float distance = separationVector.mag();
-			float overlap = radius + other.radius - distance;
-			if (overlap >= 0.0f){
-				position.add(PVector.mult(PVector.div(separationVector, distance), overlap));
-			}
-		}
-	}
+//	/**
+//	 * Enforce the non-overlap condition.
+//	 */
+//	private void enforceNoOverlap(ArrayList<Boid> neighbors) {
+//		for (Boid other : neighbors) {
+//			if (this == other) {
+//				continue;
+//			}
+//			
+//			PVector separationVector = PVector.sub(position, other.position);
+//			float distance = separationVector.mag();
+//			float overlap = radius + other.radius - distance;
+//			if (overlap >= 0.0f){
+//				position.add(PVector.mult(PVector.div(separationVector, distance), overlap));
+//			}
+//		}
+//	}
 
 	public static void setAlignment(float alignment) {
 		Boid.alignment = alignment;

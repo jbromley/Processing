@@ -1,9 +1,8 @@
-package com.jbromley.processing;
+package com.jbromley.processing.flocking;
 
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 
-import processing.core.PApplet;
 import processing.core.PVector;
 
 /**
@@ -50,6 +49,10 @@ public class Flock {
 	public void addBoid(Boid b) {
 		boids.add(b);
 		csp.addEntity(b);
+	}
+	
+	public void setWrapMode(boolean wrap) {
+		csp.setWrapMode(wrap);
 	}
 	
 	/**

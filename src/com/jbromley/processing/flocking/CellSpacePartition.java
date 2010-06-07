@@ -1,4 +1,4 @@
-package com.jbromley.processing;
+package com.jbromley.processing.flocking;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -45,7 +45,7 @@ public class CellSpacePartition<T extends Boid> {
 		 * @param bottom the y-coordinate of the bottom of the cell
 		 */
 		public Cell(float left, float top, float right, float bottom) {
-			members = new LinkedList<T>();
+			this(new PVector(left, top), new PVector(right, bottom));
 		}
 	}
 	
@@ -129,8 +129,8 @@ public class CellSpacePartition<T extends Boid> {
 		if (!wrapMode) {
 			left = Math.max(0.0f, left);
 			top = Math.max(0.0f, top);
-			right = Math.min(spaceWidth, target.x + queryRadius);
-			bottom = Math.min(spaceHeight, target.y + queryRadius);
+			right = Math.min(spaceWidth - 1, right);
+			bottom = Math.min(spaceHeight - 1, bottom);
 		}
 		
 		// Turn coordinates into x, y indices.
@@ -196,16 +196,6 @@ public class CellSpacePartition<T extends Boid> {
 	}
 
 	/**
-	 * Converts the given position into an index into the cell space partition.
-	 * @param x the x-coordinate of the position to index
-	 * @param y the y-coordinate of the position to index
-	 * @return the index of the cell in the partition containing the position
-	 */
-	private int positionToIndex(final float x, final float y) {
-		return positionToIndex(new PVector(x, y));
-	}
-	
-	/**
 	 * Converts a matrix row and column into an index into the cell space 
 	 * partition.
 	 * @param row the matrix row of the desired element
@@ -234,14 +224,14 @@ public class CellSpacePartition<T extends Boid> {
 		PVector translatedPoint = sourcePoint.get();
 		
 		if (rowIndex < 0) {
-			sourcePoint.y -= spaceHeight;
+			translatedPoint.y -= spaceHeight;
 		} else if (rowIndex >= numberCellsY) {
-			sourcePoint.y += spaceHeight;
+			translatedPoint.y += spaceHeight;
 		}
 		if (colIndex < 0) {
-			sourcePoint.x -= spaceWidth;
+			translatedPoint.x -= spaceWidth;
 		} else if (colIndex >= numberCellsX) {
-			sourcePoint.x += spaceWidth;
+			translatedPoint.x += spaceWidth;
 		}
 		
 		return translatedPoint;
