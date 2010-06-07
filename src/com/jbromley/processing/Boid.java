@@ -15,9 +15,9 @@ import processing.core.PVector;
 public class Boid {
 	
 	private static final int THROB_PERIOD = 250;
-	private static final float WANDER_RADIUS = 1.0f;
+	private static final float WANDER_RADIUS = 1.2f;
 	private static final float WANDER_DISTANCE = 2.0f;
-	private static final float WANDER_JITTER = 20.0f;
+	private static final float WANDER_JITTER = 80.0f;
 	
 	private static float alignment = 1.0f;
 	private static float cohesion = 0.5f;
@@ -276,14 +276,10 @@ public class Boid {
 		
 		feelers[0] = PVector.add(position, PVector.mult(velocity, FEELER_LENGTH));
 		
-//		rotateMatrix.reset();
-//		rotateMatrix.rotate(PApplet.HALF_PI * 3.5f);
 		PVector temp = new PVector();
 		feelerMatrix1.mult(velocity, temp);
 		feelers[1] = PVector.add(position, PVector.mult(temp, FEELER_LENGTH / 2.0f));
 		
-//		rotateMatrix.reset();
-//		rotateMatrix.rotate(PApplet.HALF_PI * 0.5f);
 		feelerMatrix2.mult(velocity, temp);
 		feelers[2] = PVector.add(position, PVector.mult(temp, FEELER_LENGTH / 2.0f));
 	}
@@ -297,8 +293,7 @@ public class Boid {
 						 parent.random(-1.0f, 1.0f) * jitter));
 		wanderTarget.normalize();
 		wanderTarget.mult(WANDER_RADIUS);
-		PVector target = wanderTarget;
-		target.add(new PVector(WANDER_DISTANCE, 0.0f));
+		PVector target = PVector.add(wanderTarget, new PVector(WANDER_DISTANCE, 0));
 		PVector worldTarget = pointToWorldSpace(position, velocity, target);
 
 		return steer(worldTarget, false);
@@ -333,16 +328,13 @@ public class Boid {
 		parent.pushMatrix();
 		parent.translate(position.x, position.y);
 		parent.rotate(theta);
+//		parent.triangle(0, -radius * 2, -radius, radius * 2, radius, radius * 2);
 		parent.beginShape(PApplet.TRIANGLES);
 		parent.vertex(0, -radius * 2);
 		parent.vertex(-radius, radius * 2);
 		parent.vertex(radius, radius * 2);
 		parent.endShape();
 		parent.popMatrix();
-		
-//		for (int i = 0; i < feelers.length; ++i) {
-//			parent.line(position.x, position.y, feelers[i].x, feelers[i].y);
-//		}
 	}
 
 	/**
@@ -376,9 +368,12 @@ public class Boid {
 		for (Boid other : neighbors) {
 			if (other != this) {
 				// Calculate vector pointing away from neighbor
-				PVector diff = PVector.sub(position,other.position);
+				PVector diff = PVector.sub(position, other.position);
 				diff.normalize();
-				diff.div(PVector.dist(position, other.position));
+				float distance = PVector.dist(position, other.position); 
+				if (distance > 0.0f) {
+					diff.div(distance);
+				}
 				steer.add(diff);
 			}
 		}
