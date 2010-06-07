@@ -56,6 +56,7 @@ public class CellSpacePartition<T extends Boid> {
 	private int numberCellsY;
 	private float cellWidth;
 	private float cellHeight;
+	private boolean wrapMode;
 	
 	/**
 	 * Creates a new cell space partition. 
@@ -71,6 +72,7 @@ public class CellSpacePartition<T extends Boid> {
 		spaceHeight = height;
 		numberCellsX = cellsX;
 		numberCellsY = cellsY;
+		wrapMode = false;
 		
 		cellWidth = spaceWidth / numberCellsX;
 		cellHeight = spaceHeight / numberCellsY;
@@ -115,34 +117,55 @@ public class CellSpacePartition<T extends Boid> {
 	
 	public ArrayList<T> getNeighborList(PVector target, float queryRadius) {
 		ArrayList<T> neighbors = new ArrayList<T>();
-
-		// Get the indices of the top left and bottom right cells.
-		float x = Math.max(0.0f, target.x - queryRadius);
-		float y = Math.max(0.0f, target.y - queryRadius);
-		int firstIndex = positionToIndex(x, y);
 		
-		x = Math.min(spaceWidth, target.x + queryRadius);
-		y = Math.min(spaceHeight, target.y + queryRadius);
-		int lastIndex = positionToIndex(x, y);
-
-		int index = firstIndex;
-		while (index < lastIndex) {
-			int rowLast = lastIndex - (int) ((lastIndex - index) / numberCellsX) * numberCellsX;
-			for (int i = index; i <= rowLast; ++i){
+		// Find the coordinates of the region of interest's corners. This will
+		// depend on the wrap mode.
+		float left = target.x - queryRadius;
+		float top = target.y - queryRadius;
+		float right = target.x + queryRadius;
+		float bottom = target.y + queryRadius;
+		
+		// Rectify the corner coordinates if we are not in wrap mode.
+		if (!wrapMode) {
+			left = Math.max(0.0f, left);
+			top = Math.max(0.0f, top);
+			right = Math.min(spaceWidth, target.x + queryRadius);
+			bottom = Math.min(spaceHeight, target.y + queryRadius);
+		}
+		
+		// Turn coordinates into x, y indices.
+		int leftIndex = (int) (Math.floor(left / cellWidth));
+		int topIndex = (int) (Math.floor(top / cellHeight));
+		int rightIndex = (int) (Math.floor(right / cellWidth));
+		int bottomIndex = (int) (Math.floor(bottom / cellHeight));
+		
+		for (int rowIndex = topIndex; rowIndex <= bottomIndex; ++rowIndex) {
+			for (int colIndex = leftIndex; colIndex <= rightIndex; ++colIndex) {
+				int index = rowColumnToIndex(rowIndex, colIndex);
 				Cell<T> cell = cells.get(index);
 				if (!cell.members.isEmpty()) {
 					for (T member : cell.members) {
-						float d = PVector.dist(member.getPosition(), target);
-						if (d < queryRadius) {
+						PVector point = !wrapMode ? member.getPosition() : 
+								translateWrappedPoint(member.getPosition(), 
+										rowIndex, colIndex);
+						float distance = PVector.dist(point, target);
+						if (distance < queryRadius) {
 							neighbors.add(member);
 						}
 					}
 				}
 			}
-			index += numberCellsX;
 		}
 		
 		return neighbors;
+	}
+	
+	public void setWrapMode(boolean useWrapping) {
+		wrapMode = useWrapping;
+	}
+	
+	public boolean getWrapMode() {
+		return wrapMode;
 	}
 	
 	/**
@@ -168,7 +191,7 @@ public class CellSpacePartition<T extends Boid> {
 		if (index > cells.size() - 1) {
 			index = cells.size() - 1;
 		}
-			
+
 		return index;
 	}
 
@@ -179,14 +202,48 @@ public class CellSpacePartition<T extends Boid> {
 	 * @return the index of the cell in the partition containing the position
 	 */
 	private int positionToIndex(final float x, final float y) {
-		int index = (int) (x / cellWidth) + (int) (y / cellHeight) * numberCellsX;
-		
-		// If the entity is exactly in the bottom right corner of the space, we
-		// have to adjust down.
-		if (index > cells.size() - 1) {
+		return positionToIndex(new PVector(x, y));
+	}
+	
+	/**
+	 * Converts a matrix row and column into an index into the cell space 
+	 * partition.
+	 * @param row the matrix row of the desired element
+	 * @param column the matrix column of the desired element
+	 * @return the index to the desired element
+	 */
+	private int rowColumnToIndex(int row, int column) {
+		if (row < 0){
+			row += numberCellsY;
+		} else if (row >= numberCellsY) {
+			row %= numberCellsY;
+		}
+		if (column < 0) {
+			column += numberCellsX;
+		} else if (column >= numberCellsX) {
+			column %= numberCellsX;
+		}
+		int index = column + row * numberCellsX;
+		if (index > cells.size()) {
 			index = cells.size() - 1;
 		}
-			
 		return index;
+	}
+	
+	private PVector translateWrappedPoint(PVector sourcePoint, int rowIndex, int colIndex) {
+		PVector translatedPoint = sourcePoint.get();
+		
+		if (rowIndex < 0) {
+			sourcePoint.y -= spaceHeight;
+		} else if (rowIndex >= numberCellsY) {
+			sourcePoint.y += spaceHeight;
+		}
+		if (colIndex < 0) {
+			sourcePoint.x -= spaceWidth;
+		} else if (colIndex >= numberCellsX) {
+			sourcePoint.x += spaceWidth;
+		}
+		
+		return translatedPoint;
 	}
 }
