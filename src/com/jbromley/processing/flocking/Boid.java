@@ -3,6 +3,9 @@ package com.jbromley.processing.flocking;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 
+import com.jbromley.processing.util.CellSpacePartition;
+import com.jbromley.processing.util.Entity;
+
 import processing.core.PApplet;
 import processing.core.PMatrix2D;
 import processing.core.PVector;
@@ -12,7 +15,7 @@ import processing.core.PVector;
  * boid and also contains the steering behaviors.
  * @author <a href="mailto:jbromley@gmail.com">J. Bromley</a>
  */
-public class Boid {
+public class Boid implements Entity {
 	
 	private static final int THROB_PERIOD = 250;
 	private static final float WANDER_RADIUS = 1.2f;

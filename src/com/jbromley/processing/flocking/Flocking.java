@@ -52,6 +52,7 @@ public class Flocking extends PApplet {
 		}
 		
 		font = createFont("Helvetica", 12);
+		textMode(SCREEN);
 	}
 	
 	/**

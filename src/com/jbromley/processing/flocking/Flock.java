@@ -3,6 +3,8 @@ package com.jbromley.processing.flocking;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 
+import com.jbromley.processing.util.CellSpacePartition;
+
 import processing.core.PVector;
 
 /**
