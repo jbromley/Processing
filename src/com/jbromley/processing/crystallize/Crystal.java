@@ -12,6 +12,7 @@ public class Crystal {
 	
 	static final float MIN_RADIUS = 20.0f;
 	static final float QUERY_RADIUS = 2.0f;
+	static final float MIN_DISTANCE = (float) Math.sqrt(2.0f);
 	
 	private LinkedList<Particle> crystal;
 	private CellSpacePartition<Particle> csp;
@@ -23,9 +24,9 @@ public class Crystal {
 	public Crystal(PApplet applet) {
 		p = applet;
 		crystal = new LinkedList<Particle>();
-		csp = new CellSpacePartition<Particle>(p.width, p.height, 64, 40);
+		csp = new CellSpacePartition<Particle>(p.width, p.height, 128, 80);
 		radius = MIN_RADIUS;
-		color = p.color(255);
+		//color = p.color(255);
 	}
 	
 	public void addParticle(Particle particle) {
@@ -49,7 +50,7 @@ public class Crystal {
 		for (Particle crystalParticle : neighbors) {
 			PVector dp = PVector.sub(crystalParticle.getPosition(), 
 					particle.getPosition());
-			if (dp.mag() <= QUERY_RADIUS) {
+			if (dp.mag() <= MIN_DISTANCE) {
 				touching = true;
 				break;
 			}
@@ -76,8 +77,13 @@ public class Crystal {
 	}
 
 	public void draw() {
+		int numParticles = crystal.size();
+		int particleIndex = 0;
 		for (Particle particle : crystal) {
-			particle.draw();
+			float hue = 240.0f * (float) particleIndex / numParticles;
+			int color = p.color(hue, 100, 100);
+			particle.draw(color);
+			++particleIndex;
 		}
 	}
 }

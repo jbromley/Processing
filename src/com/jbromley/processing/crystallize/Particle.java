@@ -36,7 +36,19 @@ public class Particle implements Entity {
 		}
 	}
 	
+	public void reposition(PVector crystalCenter, float innerRadius, float outerRadius) {
+		float radius = p.random(innerRadius, outerRadius);
+		float theta = p.random(0.0f, 2 * PApplet.PI);
+		PVector offset = new PVector(radius * PApplet.cos(theta), radius * PApplet.sin(theta));
+		position = PVector.add(crystalCenter, offset);
+	}
+	
 	public void draw() {
+		p.stroke(color);
+		p.point(position.x, position.y);
+	}
+	
+	public void draw(int color) {
 		p.stroke(color);
 		p.point(position.x, position.y);
 	}
