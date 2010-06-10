@@ -32,7 +32,6 @@ public class Crystallize extends PApplet {
 	public void draw() {
 		background(0);
 
-		
 		crystal.update(ITERATIONS);
 		crystal.draw();
 

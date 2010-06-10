@@ -22,6 +22,7 @@ public class Crystal {
 	private float radius;
 
 	private Particle freeParticle;
+	ArrayList<PVector> stickingParticles;
 	
 	private PApplet p;
 	
@@ -30,6 +31,7 @@ public class Crystal {
 		crystal = new LinkedList<Particle>();
 		csp = new CellSpacePartition<Particle>(p.width, p.height, 128, 80);
 		radius = MIN_RADIUS;
+		stickingParticles = new ArrayList<PVector>();
 	}
 	
 	public void addParticle(Particle particle) {
@@ -89,6 +91,7 @@ public class Crystal {
 			
 			if (isTouching(freeParticle)) {
 				addParticle(freeParticle);
+				stickingParticles.add(freeParticle.getPosition());
 				innerRadius = INNER_RADIUS_SCALE * radius + 1.0f;
 				outerRadius = OUTER_RADIUS_SCALE * radius;
 				freeParticle = createParticle();
@@ -111,6 +114,15 @@ public class Crystal {
 			particle.draw(color);
 			++particleIndex;
 		}
+		
+		p.pushStyle();
+		p.stroke(0, 0, 100);
+		p.fill(0, 0, 100);
+		for (PVector pos : stickingParticles) {
+			p.ellipse(pos.x, pos.y, 4, 4);
+		}
+		p.popStyle();
+		stickingParticles.clear();
 	}
 	
 	private Particle createParticle() {
