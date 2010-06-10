@@ -15,6 +15,7 @@ public class Crystal {
 	static final float OUTER_RADIUS_SCALE = 2.0f;
 	static final float QUERY_RADIUS = 2.0f;
 	static final float MIN_DISTANCE = (float) Math.sqrt(2.0f);
+	static final float SPARK_RADIUS = 4;
 	
 	private LinkedList<Particle> crystal;
 	private CellSpacePartition<Particle> csp;
@@ -119,7 +120,7 @@ public class Crystal {
 		p.stroke(0, 0, 100);
 		p.fill(0, 0, 100);
 		for (PVector pos : stickingParticles) {
-			p.ellipse(pos.x, pos.y, 4, 4);
+			p.ellipse(pos.x, pos.y, SPARK_RADIUS, SPARK_RADIUS);
 		}
 		p.popStyle();
 		stickingParticles.clear();

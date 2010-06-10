@@ -8,7 +8,7 @@ import processing.core.PFont;
 public class Crystallize extends PApplet {
 
 	private static final long serialVersionUID = 6648122436755789567L;
-	private static final int ITERATIONS = 160000;
+	private static final int ITERATIONS = 200000;
 
 	private Crystal crystal;
 	private  PFont font;
