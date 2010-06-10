@@ -11,6 +11,8 @@ import processing.core.PVector;
 public class Crystal {
 	
 	static final float MIN_RADIUS = 20.0f;
+	static final float INNER_RADIUS_SCALE = 1.1f;
+	static final float OUTER_RADIUS_SCALE = 2.0f;
 	static final float QUERY_RADIUS = 2.0f;
 	static final float MIN_DISTANCE = (float) Math.sqrt(2.0f);
 	
@@ -18,7 +20,9 @@ public class Crystal {
 	private CellSpacePartition<Particle> csp;
 	private PVector center;
 	private float radius;
-	private int color;
+
+	private Particle freeParticle;
+	
 	private PApplet p;
 	
 	public Crystal(PApplet applet) {
@@ -26,15 +30,14 @@ public class Crystal {
 		crystal = new LinkedList<Particle>();
 		csp = new CellSpacePartition<Particle>(p.width, p.height, 128, 80);
 		radius = MIN_RADIUS;
-		//color = p.color(255);
 	}
 	
 	public void addParticle(Particle particle) {
-		particle.setColor(color);
 		crystal.add(particle);
 		csp.addEntity(particle);
 		if (crystal.size() == 1) {
 			center = particle.getPosition().get();
+			freeParticle = createParticle();
 		}
 		float distance = PVector.dist(getCenter(), particle.getPosition());
 		if (distance > radius) {
@@ -75,6 +78,29 @@ public class Crystal {
 	public PVector getCenter() {
 		return center;
 	}
+	
+	public void update(int iterations) {
+		float innerRadius = INNER_RADIUS_SCALE * radius + 1.0f;
+		float outerRadius = OUTER_RADIUS_SCALE * radius;
+		//float outerRadius = innerRadius + RING_RADIUS;
+
+		for (int i = 0; i < iterations; ++i) {
+			freeParticle.update();
+			
+			if (isTouching(freeParticle)) {
+				addParticle(freeParticle);
+				innerRadius = INNER_RADIUS_SCALE * radius + 1.0f;
+				outerRadius = OUTER_RADIUS_SCALE * radius;
+				freeParticle = createParticle();
+			}
+			
+			// Check if the particle has wandered too far.
+			float distance = PVector.dist(center, freeParticle.getPosition());
+			if (distance > outerRadius) {
+				freeParticle.reposition(center, innerRadius, outerRadius);
+			}
+		}
+	}
 
 	public void draw() {
 		int numParticles = crystal.size();
@@ -85,5 +111,27 @@ public class Crystal {
 			particle.draw(color);
 			++particleIndex;
 		}
+	}
+	
+	private Particle createParticle() {
+		float innerRadius = INNER_RADIUS_SCALE * radius + 1.0f;
+		float outerRadius = OUTER_RADIUS_SCALE * radius;
+		Particle particle = new Particle(center, innerRadius, 
+				outerRadius);
+		
+		PVector position = particle.getPosition();
+		if (position.x < 0) {
+			position.x = 0;
+		} else if (position.x >= p.width) {
+			position.x = p.width - 1;
+		}
+		if (position.y < 0) {
+			position.y = 0;
+		} else if (position.y >= p.height) {
+			position.y = p.height - 1;
+		}
+		
+		return particle;
+		
 	}
 }

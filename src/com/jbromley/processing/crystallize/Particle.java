@@ -12,18 +12,17 @@ public class Particle implements Entity {
 	private PVector position;
 	private int color;
 	
-	public Particle(float x, float y, int color) {
+	public Particle(final float x, final float y) {
 		position = new PVector(x, y);
-		this.color = color;
 	}
 	
-	public Particle(PVector center, float innerRadius, float outerRadius, int color) {
+	public Particle(PVector center, final float innerRadius, 
+			final float outerRadius) {
 		float radius = p.random(innerRadius, outerRadius);
 		float theta = p.random(0, 2 * PApplet.PI);
 		PVector offset = new PVector(PApplet.cos(theta), PApplet.sin(theta));
 		offset.mult(radius);
 		position = PVector.add(center, offset);
-		this.color = color;
 	}
 	
 	public void update() {
@@ -36,10 +35,12 @@ public class Particle implements Entity {
 		}
 	}
 	
-	public void reposition(PVector crystalCenter, float innerRadius, float outerRadius) {
+	public void reposition(PVector crystalCenter, final float innerRadius, 
+			final float outerRadius) {
 		float radius = p.random(innerRadius, outerRadius);
 		float theta = p.random(0.0f, 2 * PApplet.PI);
-		PVector offset = new PVector(radius * PApplet.cos(theta), radius * PApplet.sin(theta));
+		PVector offset = new PVector(radius * PApplet.cos(theta), 
+				radius * PApplet.sin(theta));
 		position = PVector.add(crystalCenter, offset);
 	}
 	
