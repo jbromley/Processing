@@ -11,13 +11,15 @@ public class Crystallize extends PApplet {
 	private static final int ITERATIONS = 200000;
 
 	private Crystal crystal;
-	private  PFont font;
+	private PFont font;
+	private boolean showInfo;
 	
 	public void setup() {
 		size(1024, 1024, P3D);
 		frameRate(30);
 		colorMode(HSB, 360.0f, 100.0f, 100.0f);
 		background(0);
+		showInfo = false;
 
 		Particle.setApplet(this);
 
@@ -35,10 +37,31 @@ public class Crystallize extends PApplet {
 		crystal.update(ITERATIONS);
 		crystal.draw();
 
-		String info = String.format("%1$4.1f fps  crystal size=%2$d  crystal radius=%3$4.0f", 
-				frameRate, crystal.size(), crystal.getRadius());
-		textFont(font);
-		text(info, 16, 16);
+		if (showInfo) {
+			String info = String.format("%1$4.1f fps  crystal size=%2$d  crystal radius=%3$4.0f", 
+					frameRate, crystal.size(), crystal.getRadius());
+			textFont(font);
+			text(info, 16, 16);
+		}
+	}
+	
+	public void keyPressed() {
+		switch (key) {
+		case 'i': 
+			showInfo = !showInfo;
+			break;
+			
+		case 's':
+			background(0);
+			crystal.draw();
+			saveFrame("dla-########.tif");
+			break;
+			
+		case 'r':
+			crystal.reset();
+			crystal.addParticle(new Particle(width / 2, height / 2));
+			break;
+		}
 	}
 	
 	public static void main(String[] args) {

@@ -126,6 +126,13 @@ public class Crystal {
 		stickingParticles.clear();
 	}
 	
+	public void reset() {
+		crystal.clear();
+		csp.clear();
+		radius = MIN_RADIUS;
+		freeParticle = createParticle();
+	}
+	
 	private Particle createParticle() {
 		float innerRadius = INNER_RADIUS_SCALE * radius + 1.0f;
 		float outerRadius = OUTER_RADIUS_SCALE * radius;
