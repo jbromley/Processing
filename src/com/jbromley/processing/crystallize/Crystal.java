@@ -139,19 +139,6 @@ public class Crystal {
 		Particle particle = new Particle(center, innerRadius, 
 				outerRadius);
 		
-		PVector position = particle.getPosition();
-		if (position.x < 0) {
-			position.x = 0;
-		} else if (position.x >= p.width) {
-			position.x = p.width - 1;
-		}
-		if (position.y < 0) {
-			position.y = 0;
-		} else if (position.y >= p.height) {
-			position.y = p.height - 1;
-		}
-		
 		return particle;
-		
 	}
 }

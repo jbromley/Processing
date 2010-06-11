@@ -1,5 +1,7 @@
 package com.jbromley.processing.crystallize;
 
+import java.awt.geom.Rectangle2D;
+
 import com.jbromley.processing.util.Entity;
 
 import processing.core.PApplet;
@@ -18,11 +20,7 @@ public class Particle implements Entity {
 	
 	public Particle(PVector center, final float innerRadius, 
 			final float outerRadius) {
-		float radius = p.random(innerRadius, outerRadius);
-		float theta = p.random(0, 2 * PApplet.PI);
-		PVector offset = new PVector(PApplet.cos(theta), PApplet.sin(theta));
-		offset.mult(radius);
-		position = PVector.add(center, offset);
+		reposition(center, innerRadius, outerRadius);
 	}
 	
 	public void update() {
@@ -37,11 +35,20 @@ public class Particle implements Entity {
 	
 	public void reposition(PVector crystalCenter, final float innerRadius, 
 			final float outerRadius) {
-		float radius = p.random(innerRadius, outerRadius);
-		float theta = p.random(0.0f, 2 * PApplet.PI);
-		PVector offset = new PVector(radius * PApplet.cos(theta), 
-				radius * PApplet.sin(theta));
-		position = PVector.add(crystalCenter, offset);
+		Rectangle2D.Float boundingBox = new Rectangle2D.Float(0, 0, 
+				p.width, p.height);
+		PVector newPosition = null;
+		
+		do {
+			float radius = p.random(innerRadius, outerRadius);
+			float theta = p.random(0.0f, 2 * PApplet.PI);
+			PVector offset = new PVector(radius * PApplet.cos(theta), 
+					radius * PApplet.sin(theta));
+		
+			newPosition = PVector.add(crystalCenter, offset);
+		} while (!boundingBox.contains(newPosition.x, newPosition.y));
+			
+		position = newPosition;
 	}
 	
 	public void draw() {
