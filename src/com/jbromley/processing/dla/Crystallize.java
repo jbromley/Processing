@@ -66,9 +66,9 @@ public class Crystallize extends PApplet {
 	
 	public static void main(String[] args) {
 		if (args.length == 0) {
-			PApplet.main(new String[] {"com.jbromley.processing.crystallize.Crystallize"});
+			PApplet.main(new String[] {"com.jbromley.processing.dla.Crystallize"});
 		} else {
-			PApplet.main(new String[] {args[0], "com.jbromley.processing.crystallize.Crystallize"});
+			PApplet.main(new String[] {args[0], "com.jbromley.processing.dla.Crystallize"});
 		}
 	}
 
