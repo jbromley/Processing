@@ -3,8 +3,6 @@ package com.jbromley.processing.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import processing.opengl.*;
-
 import processing.core.PApplet;
 import toxi.geom.Vec3D;
 
