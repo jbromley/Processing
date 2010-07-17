@@ -3,8 +3,6 @@ package com.jbromley.processing.util;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import com.jbromley.processing.flocking.Boid;
-
 import processing.core.PVector;
 
 
