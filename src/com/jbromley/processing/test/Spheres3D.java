@@ -23,9 +23,10 @@ public class Spheres3D extends PApplet {
 	  
 	  spheres = new ArrayList<Sphere>();
 	  for (int i = 0; i < NUM_SPHERES; ++i) {
-	    float xLimit = width / 4;
-	    float yLimit = height / 4;
-	    Vec3D pos = new Vec3D(random(-xLimit, xLimit), random(-yLimit, yLimit), random(-yLimit, yLimit));
+	    float xLimit = width / 2;
+	    float yLimit = height / 2;
+	    Vec3D pos = new Vec3D(random(-xLimit, xLimit), random(-yLimit, yLimit), 
+	    		random(-yLimit, yLimit));
 	    float radius = 8;
 	    Sphere sphere = new Sphere(pos, radius);
 	    spheres.add(sphere);
@@ -36,8 +37,8 @@ public class Spheres3D extends PApplet {
 	  background(0);
 	  lights();
 	  pushMatrix();
-	  scale(2);
-	  translate(width / 4, height / 4, 0);
+	  //scale(2);
+	  translate(width / 2, height / 2, 0);
 	  rotateX(mouseY * 0.005f);
 	  rotateY(mouseX * 0.005f);
 	  for (Sphere sphere : spheres) {
