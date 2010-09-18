@@ -45,9 +45,12 @@ public class Flocking extends PApplet {
 		walls.add(new Line2D.Float(1, d, d, 1));
 		
 		flock = new Flock(this);
+		float rMax = Math.min(width, height) / 8.0f;
 		for (int i = 0; i < INITIAL_BOIDS; ++i) {
-			float x = width / 2.0f;
-			float y = height / 2.0f;
+			float r = rMax * (float) Math.sqrt(random(1.0f));
+			float theta = random(TWO_PI);
+			float x = (float) (width / 2.0f + r * Math.cos(theta));
+			float y = (float) (height / 2.0f + r * Math.sin(theta));
 			flock.addBoid(new Boid(new PVector(x, y), random(1.0f, 3.0f), 0.10f, this));
 		}
 		
