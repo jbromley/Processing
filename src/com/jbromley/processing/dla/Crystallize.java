@@ -15,7 +15,7 @@ public class Crystallize extends PApplet {
 	private boolean showInfo;
 	
 	public void setup() {
-		size(1680, 1050, P3D);
+		size(1440, 1440, P3D);
 		frameRate(30);
 		colorMode(HSB, 360.0f, 100.0f, 100.0f);
 		background(0);
