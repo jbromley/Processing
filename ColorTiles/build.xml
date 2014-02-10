@@ -1,6 +1,26 @@
 <project name="ColorTiles" basedir="." default="main">
 
-  <!-- Properties -->
+  <!-- Processing properties -->
+  <condition property="processing.dir" 
+	     value="/Applications/Processing.app/Contents/Java">
+    <os family="mac"/>
+  </condition>
+  <condition property="processing.dir" value="/opt/processing-2.1.1">
+    <and>
+      <os family="unix"/>
+      <not>
+	<os family="mac"/>
+      </not>
+    </and>
+  </condition>
+  <echo message="Processing path is ${processing.dir}."/>
+  
+  <fileset id="core.libs" dir="${processing.dir}/core"
+	   includes="**/*.jar"/>
+  <fileset id="added.libs" dir="${processing.dir}/modes/java/libraries"
+	   includes="**/*.jar"/>
+
+  <!-- Sketch properties -->
   <property name="src.dir" value="src"/>
   <property name="build.dir" value="build"/>
   <property name="classes.dir" value="${build.dir}/classes"/>
@@ -10,8 +30,7 @@
 
   <!-- Classpath -->
   <path id="classpath">
-    <fileset dir="/Applications/Processing.app/Contents/Java/core"
-	     includes="**/*.jar"/>
+    <fileset refid="core.libs"/>
     <fileset dir="${lib.dir}" includes="**/*.jar"/>
   </path>
 
