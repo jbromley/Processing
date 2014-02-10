@@ -15,7 +15,7 @@ public class Crystal {
   private static final float OUTER_RADIUS_SCALE = 2.0f;
   private static final float QUERY_RADIUS = 2.0f;
   private static final float MIN_DISTANCE = (float) Math.sqrt(2.0f);
-  private static final float SPARK_RADIUS = 4;
+  private static final float SPARK_RADIUS = 8;
   
   private LinkedList<Particle> crystal;
   private CellSpacePartition<Particle> csp;
