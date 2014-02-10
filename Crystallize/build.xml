@@ -1,4 +1,4 @@
-<project name="ColorTiles" basedir="." default="main">
+<project name="Crystallize" basedir="." default="main">
 
   <!-- Processing properties -->
   <condition property="processing.dir" 
@@ -26,7 +26,7 @@
   <property name="classes.dir" value="${build.dir}/classes"/>
   <property name="jar.dir" value="${build.dir}/jar"/>
   <property name="lib.dir" value="../libraries"/>
-  <property name="main-class"  value="org.jbromley.colortiles.ColorTiles"/>
+  <property name="main-class"  value="org.jbromley.crystallize.Crystallize"/>
 
   <!-- Classpath -->
   <path id="classpath">
