@@ -1,13 +1,21 @@
+// Crystal.java
+// Top-level structure for the DLA crystal.
+package org.jbromley.crystallize;
+
+
+import processing.core.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
+
 
 public class Crystal {
   
-  final float MIN_RADIUS = 20.0f;
-  final float INNER_RADIUS_SCALE = 1.1f;
-  final float OUTER_RADIUS_SCALE = 2.0f;
-  final float QUERY_RADIUS = 2.0f;
-  final float MIN_DISTANCE = (float) Math.sqrt(2.0f);
-  final float SPARK_RADIUS = 4;
+  private static final float MIN_RADIUS = 20.0f;
+  private static final float INNER_RADIUS_SCALE = 1.1f;
+  private static final float OUTER_RADIUS_SCALE = 2.0f;
+  private static final float QUERY_RADIUS = 2.0f;
+  private static final float MIN_DISTANCE = (float) Math.sqrt(2.0f);
+  private static final float SPARK_RADIUS = 4;
   
   private LinkedList<Particle> crystal;
   private CellSpacePartition<Particle> csp;
@@ -22,7 +30,7 @@ public class Crystal {
   public Crystal(PApplet applet) {
     p = applet;
     crystal = new LinkedList<Particle>();
-    csp = new CellSpacePartition<Particle>(width, height, 128, 80);
+    csp = new CellSpacePartition<Particle>(p.width, p.height, 128, 80);
     radius = MIN_RADIUS;
     stickingParticles = new ArrayList<PVector>();
   }
@@ -77,7 +85,6 @@ public class Crystal {
   public void update(int iterations) {
     float innerRadius = INNER_RADIUS_SCALE * radius + 1.0f;
     float outerRadius = OUTER_RADIUS_SCALE * radius;
-    //float outerRadius = innerRadius + RING_RADIUS;
 
     for (int i = 0; i < iterations; ++i) {
       freeParticle.update();
@@ -103,18 +110,18 @@ public class Crystal {
     int particleIndex = 0;
     for (Particle particle : crystal) {
       float hue = 240.0f * (float) particleIndex / numParticles;
-      int colour = color(hue, 100, 100);
+      int colour = p.color(hue, 100, 100);
       particle.draw(colour);
       ++particleIndex;
     }
     
-    pushStyle();
-    stroke(0, 0, 100);
-    fill(0, 0, 100);
+    p.pushStyle();
+    p.stroke(0, 0, 100);
+    p.fill(0, 0, 100);
     for (PVector pos : stickingParticles) {
-      ellipse(pos.x, pos.y, SPARK_RADIUS, SPARK_RADIUS);
+      p.ellipse(pos.x, pos.y, SPARK_RADIUS, SPARK_RADIUS);
     }
-    popStyle();
+    p.popStyle();
     stickingParticles.clear();
   }
   
@@ -128,8 +135,7 @@ public class Crystal {
   private Particle createParticle() {
     float innerRadius = INNER_RADIUS_SCALE * radius + 1.0f;
     float outerRadius = OUTER_RADIUS_SCALE * radius;
-    Particle particle = new Particle(center, innerRadius, 
-        outerRadius);
+    Particle particle = new Particle(center, innerRadius, outerRadius, p);
     
     return particle;
   }
