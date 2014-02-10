@@ -29,9 +29,9 @@ public class ColorTiles extends PApplet {
 	for (int x = -HALF_WIDTH; x <= HALF_WIDTH; ++x) {
 	    for (int y = -HALF_WIDTH; y <= HALF_WIDTH; ++y) {
 		for (int z = -HALF_WIDTH; z <= HALF_WIDTH; ++z) {
-		    int xpos = 3 * x * TILE_WIDTH;
-		    int ypos = 3 * y * TILE_HEIGHT;
-		    int zpos = z * 4 * TILE_WIDTH;
+		    int xpos = 3 * x * TILE_WIDTH / 2;
+		    int ypos = 3 * y * TILE_HEIGHT / 2;
+		    int zpos = z * 4 * TILE_WIDTH / 2;
 		    Tile tile = new Tile(xpos, ypos, zpos, TILE_WIDTH, 
 					 TILE_HEIGHT, TILE_DEPTH, 0.001f, 
 					 this);
