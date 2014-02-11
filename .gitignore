@@ -3,4 +3,6 @@
 bin
 build
 modes
+libraries
+!libraries/fetch.sh
 *~
