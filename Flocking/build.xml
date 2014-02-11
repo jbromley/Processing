@@ -1,0 +1,88 @@
+<project name="Flocking" basedir="." default="main">
+
+  <!-- Processing properties -->
+  <condition property="processing.dir" 
+	     value="/Applications/Processing.app/Contents/Java">
+    <os family="mac"/>
+  </condition>
+  <condition property="processing.dir" value="/opt/processing-2.1.1">
+    <and>
+      <os family="unix"/>
+      <not>
+	<os family="mac"/>
+      </not>
+    </and>
+  </condition>
+  <!-- <echo message="Processing path is ${processing.dir}."/> -->
+  
+  <fileset id="core.libs" dir="${processing.dir}/core"
+	   includes="**/*.jar"/>
+  <fileset id="added.libs" dir="${processing.dir}/modes/java/libraries"
+	   includes="**/*.jar"/>
+
+  <!-- appbundler task setup -->
+  <taskdef name="bundleapp"
+	   classname="com.oracle.appbundler.AppBundlerTask"
+	   classpath="../tools/appbundler-1.0.jar"/>
+
+  <!-- Sketch properties -->
+  <property name="src.dir" value="src"/>
+  <property name="build.dir" value="build"/>
+  <property name="dist.dir" value="${build.dir}/dist"/>
+  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="jar.dir" value="${build.dir}/jar"/>
+  <property name="lib.dir" value="../libraries"/>
+  <property name="main-class"  value="org.jbromley.flocking.Flocking"/>
+
+  <!-- Classpath -->
+  <path id="classpath">
+    <fileset refid="core.libs"/>
+    <fileset dir="${lib.dir}" includes="**/*.jar"/>
+  </path>
+
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="${classes.dir}"/>
+    <javac srcdir="${src.dir}" destdir="${classes.dir}" 
+	   classpathref="classpath" includeantruntime="false"/>
+  </target>
+
+  <target name="jar" depends="compile">
+    <mkdir dir="${jar.dir}"/>
+    <jar destfile="${jar.dir}/${ant.project.name}.jar" 
+	 basedir="${classes.dir}">
+      <manifest>
+        <attribute name="Main-Class" value="${main-class}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="run" depends="jar">
+    <java fork="true" classname="${main-class}">
+      <classpath>
+	<path refid="classpath"/>
+	<path location="${jar.dir}/${ant.project.name}.jar"/>
+      </classpath>
+    </java>
+  </target>
+
+  <target name="clean-build" depends="clean,jar"/>
+
+  <target name="main" depends="clean,run"/>
+  
+  <target name="bundle-app" depends="jar">
+    <mkdir dir="${dist.dir}"/>
+    <bundleapp outputdirectory="${dist.dir}"
+	       name="Flocking"
+	       displayname="Flocking"
+	       identifier="org.jbromley.flocking.Flocking"
+	       mainclassname="org.jbromley.flocking.Flocking">
+      <classpath dir="${processing.dir}/core" includes="**/*.jar"/>
+      <classpath file="${jar.dir}/${ant.project.name}.jar"/>
+    </bundleapp>
+  </target>
+
+</project>
