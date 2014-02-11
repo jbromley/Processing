@@ -13,16 +13,22 @@
       </not>
     </and>
   </condition>
-  <echo message="Processing path is ${processing.dir}."/>
+  <!-- <echo message="Processing path is ${processing.dir}."/> -->
   
   <fileset id="core.libs" dir="${processing.dir}/core"
 	   includes="**/*.jar"/>
   <fileset id="added.libs" dir="${processing.dir}/modes/java/libraries"
 	   includes="**/*.jar"/>
 
+  <!-- appbundler task setup -->
+  <taskdef name="bundleapp"
+	   classname="com.oracle.appbundler.AppBundlerTask"
+	   classpath="../tools/appbundler-1.0.jar"/>
+
   <!-- Sketch properties -->
   <property name="src.dir" value="src"/>
   <property name="build.dir" value="build"/>
+  <property name="dist.dir" value="${build.dir}/dist"/>
   <property name="classes.dir" value="${build.dir}/classes"/>
   <property name="jar.dir" value="${build.dir}/jar"/>
   <property name="lib.dir" value="../libraries"/>
@@ -66,5 +72,17 @@
   <target name="clean-build" depends="clean,jar"/>
 
   <target name="main" depends="clean,run"/>
+  
+  <target name="bundle-app" depends="jar">
+    <mkdir dir="${dist.dir}"/>
+    <bundleapp outputdirectory="${dist.dir}"
+	       name="Crystallize"
+	       displayname="Crystallize"
+	       identifier="org.jbromley.crystallize.Crystallize"
+	       mainclassname="org.jbromley.crystallize.Crystallize">
+      <classpath dir="${processing.dir}/core" includes="**/*.jar"/>
+      <classpath file="${jar.dir}/${ant.project.name}.jar"/>
+    </bundleapp>
+  </target>
 
 </project>
