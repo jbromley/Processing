@@ -1,5 +1,15 @@
 <project name="ColorTiles" basedir="." default="main">
 
+  <!-- Sketch properties -->
+  <property name="main-class" value="org.jbromley.colortiles.ColorTiles"/> 
+  <property name="src.dir" value="src"/>
+  <property name="build.dir" value="build"/>
+  <property name="dist.dir" value="${build.dir}/dist"/>
+  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="jar.dir" value="${build.dir}/jar"/>
+  <property name="lib.dir" value="../libraries"/>
+
+
   <!-- Processing properties -->
   <condition property="processing.dir" 
 	     value="/Applications/Processing.app/Contents/Java">
@@ -13,25 +23,19 @@
       </not>
     </and>
   </condition>
-  <echo message="Processing path is ${processing.dir}."/>
-  
+
+  <!-- Set up filesets for the classpath. -->
   <fileset id="core.libs" dir="${processing.dir}/core"
 	   includes="**/*.jar"/>
   <fileset id="added.libs" dir="${processing.dir}/modes/java/libraries"
 	   includes="**/*.jar"/>
-
-  <!-- Sketch properties -->
-  <property name="src.dir" value="src"/>
-  <property name="build.dir" value="build"/>
-  <property name="classes.dir" value="${build.dir}/classes"/>
-  <property name="jar.dir" value="${build.dir}/jar"/>
-  <property name="lib.dir" value="../libraries"/>
-  <property name="main-class"  value="org.jbromley.colortiles.ColorTiles"/>
+  <fileset id="user.libs" dir="${lib.dir}" 
+	   includes="**/*.jar"/>
 
   <!-- Classpath -->
   <path id="classpath">
     <fileset refid="core.libs"/>
-    <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    <fileset refid="user.libs"/>
   </path>
 
   <target name="clean">
@@ -66,5 +70,24 @@
   <target name="clean-build" depends="clean,jar"/>
 
   <target name="main" depends="clean,run"/>
+  
+  <target name="bundle-app" depends="jar">
+
+    <!-- appbundler task setup -->
+    <taskdef name="bundleapp"
+	     classname="com.oracle.appbundler.AppBundlerTask"
+	     classpath="../tools/appbundler-1.0.jar"/>
+
+    <mkdir dir="${dist.dir}"/>
+    <bundleapp outputdirectory="${dist.dir}"
+	       name="${ant.project.name}"
+	       displayname="${ant.project.name}"
+	       identifier="${main-class}"
+	       mainclassname="${main-class}">
+      <classpath dir="${processing.dir}/core" includes="**/*.jar"/>
+      <!-- <classpath dir="${lib.dir}" includes="**/*.jar"/> -->
+      <classpath file="${jar.dir}/${ant.project.name}.jar"/>
+    </bundleapp>
+  </target>
 
 </project>

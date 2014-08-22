@@ -1,4 +1,4 @@
-// WhiteSquares
+// ColorTiles
 // Simulation of the white tile sculpture at SJC.
 package org.jbromley.colortiles;
 
