@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Spheres3D extends PApplet {
 
-    private static final int NUM_SPHERES = 500;
+    private static final int NUM_SPHERES = 1000;
 
     private List<Sphere> spheres;
 	  
