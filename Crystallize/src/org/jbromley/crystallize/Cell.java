@@ -24,7 +24,7 @@ public class Cell<T> {
      * @param bottomRight the coordinate of the bottom right corner of the cell
      */
     public Cell(PVector topLeft, PVector bottomRight) {
-	members = new LinkedList<T>();
+        members = new LinkedList<T>();
     }
     
     /**
@@ -37,7 +37,7 @@ public class Cell<T> {
      * @param bottom the y-coordinate of the bottom of the cell
      */
     public Cell(float left, float top, float right, float bottom) {
-	this(new PVector(left, top), new PVector(right, bottom));
+        this(new PVector(left, top), new PVector(right, bottom));
     }
 }
 

@@ -35,8 +35,7 @@ public class CellSpacePartition<T extends Entity> {
      * @param cellsY the number of vertical cells
      * @param maxEntities the maximum number of entities to allow in a cell
      */
-    public CellSpacePartition(float width, float height, 
-                              int cellsX, int cellsY) {
+    public CellSpacePartition(float width, float height, int cellsX, int cellsY) {
         cells = new ArrayList<Cell<T>>();
         spaceWidth = width;
         spaceHeight = height;

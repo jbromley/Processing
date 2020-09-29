@@ -7,7 +7,7 @@ import processing.core.PVector;
 
 
 public interface Entity {
-  public void setPosition(final PVector position);
-  public PVector getPosition();
+    public void setPosition(final PVector position);
+    public PVector getPosition();
 }
 
