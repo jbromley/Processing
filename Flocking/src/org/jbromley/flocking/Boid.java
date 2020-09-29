@@ -70,7 +70,7 @@ public class Boid implements Entity {
      * @param applet the parent PApplet
      */
     public Boid(PVector pos, float ms, float mf, Flocking applet) {
-	p = applet;
+        p = applet;
         position = pos.get();
         velocity = new PVector(p.random(-1, 1), p.random(-1, 1));
         accel = new PVector(0,0);
@@ -149,9 +149,7 @@ public class Boid implements Entity {
      */
     private void updateMotion() {
         // Make boid "throb".
-        radius = startRadius * (1.0f + 0.5f * 
-				p.sin(throbOffset 
-				      + (float) p.millis() / THROB_PERIOD));
+        radius = startRadius * (1.0f + 0.5f * p.sin(throbOffset + (float) p.millis() / THROB_PERIOD));
                 
         // Calculate motion for this step.
         velocity.add(accel);

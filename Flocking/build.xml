@@ -5,7 +5,7 @@
 	     value="/Applications/Processing.app/Contents/Java">
     <os family="mac"/>
   </condition>
-  <condition property="processing.dir" value="/opt/processing-2.1.1">
+  <condition property="processing.dir" value="/opt/processing">
     <and>
       <os family="unix"/>
       <not>

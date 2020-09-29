@@ -21,13 +21,15 @@ public class Flocking extends PApplet {
     private boolean showWalls = false;
     private boolean showInfo = true;
         
+    public void settings()
+    {
+        size(1920, 1200, "processing.opengl.PGraphics3D");
+    }
+
     /**
      * Creates the flock boids demo. 
      */
     public void setup() {
-        //size(screen.width, screen.height, P3D);
-        size(1600, 1000, P3D);
-                
         // Create walls
         float d = width / 8.0f;
         walls = new ArrayList<Line2D.Float>();
