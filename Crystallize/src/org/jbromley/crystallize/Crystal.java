@@ -12,10 +12,10 @@ public class Crystal {
 
     private static final float MIN_RADIUS = 20.0f;
     private static final float INNER_RADIUS_SCALE = 1.1f;
-    private static final float OUTER_RADIUS_SCALE = 2.0f;
+    private static final float OUTER_RADIUS_SCALE = 1.25f;
     private static final float QUERY_RADIUS = 2.0f;
     private static final float MIN_DISTANCE = (float) Math.sqrt(2.0f);
-    private static final float SPARK_RADIUS = 8;
+    private static final float SPARK_RADIUS = 2;
 
     private LinkedList<Particle> crystal;
     private CellSpacePartition<Particle> csp;
@@ -50,7 +50,7 @@ public class Crystal {
 
     public boolean isTouching(Particle particle) {
         boolean touching = false;
-        ArrayList<Particle> neighbors = csp.getNeighborList( particle.getPosition(), QUERY_RADIUS);
+        ArrayList<Particle> neighbors = csp.getNeighborList(particle.getPosition(), QUERY_RADIUS);
         
         for (Particle crystalParticle : neighbors) {
             PVector dp = PVector.sub(crystalParticle.getPosition(), particle.getPosition());
